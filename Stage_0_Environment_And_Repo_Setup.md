@@ -110,7 +110,7 @@ DocDue/                          ← Repo root (already exists)
 │       │   └── routes/          ← Route handlers (auth, docs, etc.)
 │       │       └── __init__.py
 │       ├── core/                ← Config, security, JWT
-│       ├── models/              ← SQLAlchemy DB models
+│       ├── models/              ← Beanie ODM MongoDB document models
 │       ├── schemas/             ← Pydantic request/response schemas
 │       ├── services/            ← Business logic (OCR, S3, email)
 │       └── workers/             ← APScheduler background jobs
@@ -209,8 +209,8 @@ python -m venv .venv
 # Upgrade pip first
 python -m pip install --upgrade pip
 
-# Install all dependencies
-pip install fastapi uvicorn[standard] sqlalchemy alembic psycopg2-binary python-dotenv python-jose[cryptography] passlib[bcrypt] python-multipart boto3 pytesseract Pillow pdf2image apscheduler
+# Install all dependencies (MongoDB Motor driver + Beanie ODM)
+pip install fastapi uvicorn[standard] motor beanie pymongo python-dotenv python-jose[cryptography] passlib[bcrypt] python-multipart boto3 pytesseract Pillow pdf2image apscheduler
 
 # Install dev/test tools
 pip install pytest httpx pytest-asyncio
@@ -233,9 +233,9 @@ pip install -r requirements.txt
 |---------|---------|
 | `fastapi` | Web framework for the API |
 | `uvicorn[standard]` | ASGI server to run FastAPI |
-| `sqlalchemy` | ORM — maps Python classes to DB tables |
-| `alembic` | DB migrations tool (schema version control) |
-| `psycopg2-binary` | PostgreSQL driver (connects Python to Postgres) |
+| `motor` | Async Python driver for MongoDB |
+| `beanie` | Async ODM (Object-Document Mapper) for MongoDB based on Pydantic |
+| `pymongo` | Standard MongoDB driver |
 | `python-dotenv` | Loads `.env` file into environment variables |
 | `python-jose[cryptography]` | JWT token generation and validation |
 | `passlib[bcrypt]` | Password hashing with bcrypt |
@@ -642,9 +642,9 @@ Before calling this stage done, verify every item below:
 ## 🚀 What's Next: Sprint 1
 
 With your environment ready, **Sprint 1** will cover:
-- Designing and creating all PostgreSQL tables on **Supabase**
+- Designing and creating all MongoDB Document Collections on **MongoDB Atlas**
 - Building the **FastAPI Auth system**: registration, login, JWT issue & refresh, bcrypt hashing
-- Setting up **Alembic** for database migrations
+- Setting up **Beanie ODM & Motor** database connection initialization
 - Implementing **tenant isolation middleware**
 
 ---
