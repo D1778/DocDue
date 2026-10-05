@@ -65,4 +65,6 @@ yarn-error.log*
 # --- Vercel / Deployment ---
 .vercel
 
-PRO_DESX.docx, Stage_0_*, CLAUDE.md
+PRO_DESX.docx
+Stage_0_*
+CLAUDE.md
