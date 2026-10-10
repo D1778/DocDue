@@ -23,8 +23,6 @@ env/
 dist/
 build/
 *.egg
-# --- Alembic (keep structure, ignore local cache) ---
-# alembic/versions/ is committed on purpose
 # --- Node.js / Frontend ---
 node_modules/
 .next/
@@ -68,3 +66,5 @@ yarn-error.log*
 PRO_DESX.docx
 Stage_0_*
 CLAUDE.md
+DocDue Sprint 1_*
+Stage_1.pdf

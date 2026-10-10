@@ -1,0 +1,8 @@
+# Root-level requirements file — delegates to the backend package list.
+# The frontend (Next.js) uses npm/package.json, not pip.
+# Install backend dependencies with:
+#   cd backend && pip install -r requirements.txt
+# Or from the repo root:
+#   pip install -r backend/requirements.txt
+
+-r backend/requirements.txt
