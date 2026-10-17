@@ -1,3 +1,4 @@
+import pytest
 import pytest_asyncio
 from beanie import init_beanie
 from httpx import ASGITransport, AsyncClient
@@ -5,7 +6,9 @@ from pymongo import AsyncMongoClient
 
 from app.core.config import settings
 from app.models import ALL_MODELS
+from app.services import storage_service
 from main import app
+from tests.fake_storage import FakeStorage
 
 TEST_DB_NAME = "docdue_test"
 
@@ -25,3 +28,14 @@ async def client():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as c:
         yield c
+
+
+@pytest.fixture
+def storage(monkeypatch):
+    """Swap the real S3 functions for an in-memory fake, for tests that ask for it."""
+    fake = FakeStorage()
+    monkeypatch.setattr(storage_service, "create_upload_url", fake.create_upload_url)
+    monkeypatch.setattr(storage_service, "create_download_url", fake.create_download_url)
+    monkeypatch.setattr(storage_service, "inspect_object", fake.inspect_object)
+    monkeypatch.setattr(storage_service, "delete_object", fake.delete_object)
+    return fake
