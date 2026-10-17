@@ -6,7 +6,7 @@ from pymongo import AsyncMongoClient
 
 from app.core.config import settings
 from app.models import ALL_MODELS
-from app.services import storage_service
+from app.services import ocr_pipeline, storage_service
 from main import app
 from tests.fake_storage import FakeStorage
 
@@ -38,4 +38,17 @@ def storage(monkeypatch):
     monkeypatch.setattr(storage_service, "create_download_url", fake.create_download_url)
     monkeypatch.setattr(storage_service, "inspect_object", fake.inspect_object)
     monkeypatch.setattr(storage_service, "delete_object", fake.delete_object)
+    monkeypatch.setattr(storage_service, "download_object", fake.download_object)
     return fake
+
+
+@pytest.fixture(autouse=True)
+def no_automatic_ocr(monkeypatch):
+    """Keep OCR from running by itself in tests, so each test controls when it happens.
+
+    Tests that want OCR call the real function directly (see test_ocr_flow.py).
+    """
+    async def do_nothing(document_id):
+        return None
+
+    monkeypatch.setattr(ocr_pipeline, "process_document", do_nothing)

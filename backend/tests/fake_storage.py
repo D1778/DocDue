@@ -1,4 +1,4 @@
-from app.services.storage_service import ObjectInfo
+from app.services.storage_service import ObjectInfo, StorageError
 
 
 class FakeStorage:
@@ -23,6 +23,15 @@ class FakeStorage:
 
     async def delete_object(self, key):
         self.objects.pop(key, None)
+
+    async def download_object(self, key, max_bytes):
+        item = self.objects.get(key)
+        if item is None:
+            raise StorageError("fake: object not found")
+        data = item[1]
+        if len(data) > max_bytes:
+            raise StorageError("fake: object too large")
+        return data
 
     # --- helpers only tests use ---
     def put(self, key, content_type, data):
