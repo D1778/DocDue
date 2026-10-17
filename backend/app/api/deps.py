@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 from app.core import security
 from app.core.utils import parse_object_id
+from app.models.document import DocumentRecord
 from app.models.enums import Role
 from app.models.user import User
 
@@ -54,3 +55,37 @@ async def require_admin(user: User = Depends(get_current_user)) -> User:
             detail="Admin access required",
         )
     return user
+
+
+async def get_tenant_document(
+    document_id: str,
+    user: User = Depends(get_current_user),
+) -> DocumentRecord:
+    """Load a document by id, but ONLY if it belongs to the caller's tenant.
+
+    Anything else (bad id, unknown id, another tenant's id) gives the same 404,
+    so nobody can learn which ids exist.
+    """
+    not_found = HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND, detail="Document not found"
+    )
+    oid = parse_object_id(document_id)
+    if oid is None:
+        raise not_found
+
+    document = await DocumentRecord.find_one(
+        DocumentRecord.id == oid,
+        DocumentRecord.tenant_id == user.tenant_id,
+    )
+    if document is None:
+        raise not_found
+    return document
+
+
+def require_owner_or_admin(document: DocumentRecord, user: User) -> None:
+    """Only the uploader or a tenant admin may change or delete a document."""
+    if user.role != Role.ADMIN and document.owner_user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the uploader or an admin can do this",
+        )

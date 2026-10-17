@@ -1,11 +1,16 @@
+import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.api.router import api_router
 from app.core import database
 from app.core.config import settings
+from app.services.storage_service import StorageError
+
+logger = logging.getLogger("docdue")
 
 
 @asynccontextmanager
@@ -18,7 +23,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="DocDue API",
     description="Document expiry tracking SaaS - backend API",
-    version="0.2.0",
+    version="0.3.0",
     lifespan=lifespan,
 )
 
@@ -32,6 +37,16 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix="/api/v1")
+
+
+@app.exception_handler(StorageError)
+async def storage_error_handler(request: Request, exc: StorageError):
+    # The real reason goes to the server log. The user only gets a safe message.
+    logger.error("Storage error: %s (cause: %r)", exc, exc.__cause__)
+    return JSONResponse(
+        status_code=502,
+        content={"detail": "Storage service error. Please try again."},
+    )
 
 
 @app.get("/")
