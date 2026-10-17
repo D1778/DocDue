@@ -8,14 +8,23 @@ from fastapi.responses import JSONResponse
 from app.api.router import api_router
 from app.core import database
 from app.core.config import settings
+from app.services import ocr_service
 from app.services.storage_service import StorageError
 
+# Show our own INFO messages (like "OCR done for document ...") in the terminal
+logging.basicConfig(level=logging.WARNING)
+logging.getLogger("docdue").setLevel(logging.INFO)
 logger = logging.getLogger("docdue")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await database.init_db()      # runs once at startup
+    try:
+        ocr_service.configure_tesseract(settings.TESSERACT_CMD)
+    except ocr_service.OcrUnavailable as exc:
+        # The API still works; uploaded documents just go to "needs_review"
+        logger.warning("OCR disabled: %s", exc)
     yield
     await database.close_db()     # runs once at shutdown
 
@@ -23,7 +32,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="DocDue API",
     description="Document expiry tracking SaaS - backend API",
-    version="0.3.0",
+    version="0.4.0",
     lifespan=lifespan,
 )
 

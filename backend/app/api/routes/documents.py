@@ -1,13 +1,13 @@
 from typing import Optional
 
 from beanie import PydanticObjectId
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 
 from app.api.deps import get_current_user, get_tenant_document, require_owner_or_admin
 from app.core.config import settings
 from app.core.utils import utcnow
 from app.models.document import DocumentRecord
-from app.models.enums import DocumentStatus, DocumentType
+from app.models.enums import DocumentStatus, DocumentType, OcrStatus
 from app.models.user import User
 from app.schemas.document import (
     DocumentListResponse,
@@ -17,7 +17,8 @@ from app.schemas.document import (
     UploadUrlResponse,
     ViewUrlResponse,
 )
-from app.services import storage_service
+from app.services import ocr_pipeline, storage_service
+from app.services.expiry import compute_status, to_utc_midnight
 
 router = APIRouter(prefix="/documents", tags=["Documents"])
 
@@ -61,7 +62,10 @@ async def request_upload_url(data: UploadUrlRequest,
 # ---------- 2. confirm the upload ----------
 
 @router.post("/{document_id}/complete", response_model=DocumentResponse)
-async def complete_upload(document: DocumentRecord = Depends(get_tenant_document)):
+async def complete_upload(
+    background_tasks: BackgroundTasks,
+    document: DocumentRecord = Depends(get_tenant_document),
+):
     """Look at the file that actually arrived in S3 and accept or reject it."""
     if document.status != DocumentStatus.PENDING_UPLOAD:
         return DocumentResponse.model_validate(document)    # already done: safe to repeat
@@ -92,9 +96,13 @@ async def complete_upload(document: DocumentRecord = Depends(get_tenant_document
         )
 
     document.file_size = info.size                  # trust S3's number, not the client's
-    document.status = DocumentStatus.PROCESSING     # Sprint 3's OCR picks it up from here
+    document.status = DocumentStatus.PROCESSING     # OCR reads it in the background
+    document.ocr_status = OcrStatus.PENDING
     document.updated_at = utcnow()
     await document.save()
+
+    # Runs AFTER this response is sent, so the user is not kept waiting for OCR
+    background_tasks.add_task(ocr_pipeline.process_document, document.id)
     return DocumentResponse.model_validate(document)
 
 
@@ -166,8 +174,50 @@ async def update_document(
         document.title = data.title.strip()
     if data.document_type is not None:
         document.document_type = data.document_type
+
+    if data.expiry_date is not None:
+        if document.status == DocumentStatus.PENDING_UPLOAD:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Finish the upload before setting an expiry date",
+            )
+        # A human-entered date always wins over OCR
+        stamp = to_utc_midnight(data.expiry_date)
+        document.expiry_date = stamp
+        document.suggested_expiry_date = None
+        document.ocr_status = OcrStatus.MANUALLY_SET
+        document.status = compute_status(stamp, settings.EXPIRING_SOON_DAYS)
+
     document.updated_at = utcnow()
     await document.save()
+    return DocumentResponse.model_validate(document)
+
+
+@router.post("/{document_id}/reprocess", response_model=DocumentResponse,
+             status_code=status.HTTP_202_ACCEPTED)
+async def reprocess_document(
+    background_tasks: BackgroundTasks,
+    document: DocumentRecord = Depends(get_tenant_document),
+    user: User = Depends(get_current_user),
+):
+    """Run OCR again (after a failure, or if the first read was wrong)."""
+    require_owner_or_admin(document, user)
+    if document.status == DocumentStatus.PENDING_UPLOAD or not document.file_key:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This document has no uploaded file yet",
+        )
+    if document.status == DocumentStatus.PROCESSING:
+        return DocumentResponse.model_validate(document)     # already running
+
+    document.expiry_date = None
+    document.suggested_expiry_date = None
+    document.ocr_confidence = None
+    document.ocr_status = OcrStatus.PENDING
+    document.status = DocumentStatus.PROCESSING
+    document.updated_at = utcnow()
+    await document.save()
+    background_tasks.add_task(ocr_pipeline.process_document, document.id)
     return DocumentResponse.model_validate(document)
 
 
