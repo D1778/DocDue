@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -21,9 +22,23 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    # --- AWS S3 ---
+    AWS_ACCESS_KEY_ID: str
+    AWS_SECRET_ACCESS_KEY: str
+    AWS_SESSION_TOKEN: Optional[str] = None      # only for temporary credentials
+    AWS_REGION: str = "ap-south-1"
+    S3_BUCKET_NAME: str
+    S3_ENDPOINT_URL: Optional[str] = None        # only for non-AWS providers
+    PRESIGNED_URL_EXPIRE_SECONDS: int = 300
+    MAX_UPLOAD_SIZE_MB: int = 10
+
     # --- App ---
     ENVIRONMENT: str = "development"
     FRONTEND_URL: str = "http://localhost:3000"
+
+    @property
+    def MAX_UPLOAD_SIZE_BYTES(self) -> int:
+        return self.MAX_UPLOAD_SIZE_MB * 1024 * 1024
 
 
 @lru_cache
