@@ -160,3 +160,25 @@ async def inspect_object(key: str) -> Optional[ObjectInfo]:
 
 async def delete_object(key: str) -> None:
     await asyncio.to_thread(_delete_object, key)
+
+def _download_object(key: str, max_bytes: int) -> bytes:
+    """Read a whole object into memory, but refuse anything bigger than max_bytes."""
+    client = get_client()
+    try:
+        response = client.get_object(Bucket=settings.S3_BUCKET_NAME, Key=key)
+        try:
+            data = response["Body"].read(max_bytes + 1)   # one extra byte reveals "too big"
+        finally:
+            response["Body"].close()
+    except ClientError as exc:
+        code = exc.response.get("Error", {}).get("Code", "")
+        raise StorageError(f"S3 error while downloading object: {code}") from exc
+    except BotoCoreError as exc:
+        raise StorageError("Could not reach S3") from exc
+    if len(data) > max_bytes:
+        raise StorageError("Stored file is larger than the allowed maximum")
+    return data
+
+
+async def download_object(key: str, max_bytes: int) -> bytes:
+    return await asyncio.to_thread(_download_object, key, max_bytes)
