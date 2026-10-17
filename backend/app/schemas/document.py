@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Dict, List, Optional
 
 from beanie import PydanticObjectId
@@ -53,7 +53,9 @@ class DocumentResponse(BaseModel):
     content_type: Optional[str] = None
     file_size: Optional[int] = None
     expiry_date: Optional[datetime] = None
+    suggested_expiry_date: Optional[datetime] = None
     ocr_status: OcrStatus
+    ocr_confidence: Optional[float] = None
     status: DocumentStatus
     created_at: datetime
     updated_at: datetime
@@ -69,6 +71,14 @@ class DocumentListResponse(BaseModel):
 class DocumentUpdate(BaseModel):
     title: Optional[str] = Field(default=None, min_length=1, max_length=150)
     document_type: Optional[DocumentType] = None
+    expiry_date: Optional[date] = None        # the user typing or correcting the date
+
+    @field_validator("expiry_date")
+    @classmethod
+    def sensible_year(cls, v: Optional[date]) -> Optional[date]:
+        if v is not None and not (1990 <= v.year <= date.today().year + 50):
+            raise ValueError("Expiry date looks wrong. Check the year.")
+        return v
 
 
 class ViewUrlResponse(BaseModel):

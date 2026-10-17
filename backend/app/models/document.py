@@ -25,6 +25,7 @@ class DocumentRecord(Document):
     expiry_date: Optional[datetime] = None
     ocr_status: OcrStatus = OcrStatus.PENDING
     ocr_confidence: Optional[float] = None
+    suggested_expiry_date: Optional[datetime] = None   # OCR's unsure guess; never used for reminders
     status: DocumentStatus = DocumentStatus.PENDING_UPLOAD
 
     # Tenants this document is also visible to (vault linking, later)

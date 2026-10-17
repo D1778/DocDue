@@ -32,6 +32,11 @@ class Settings(BaseSettings):
     PRESIGNED_URL_EXPIRE_SECONDS: int = 300
     MAX_UPLOAD_SIZE_MB: int = 10
 
+    # --- OCR (Sprint 3) ---
+    TESSERACT_CMD: Optional[str] = None          # full path to tesseract.exe if not on PATH
+    OCR_LANG: str = "eng"                        # "eng+hin" if you installed Hindi data
+    EXPIRING_SOON_DAYS: int = 30                 # "expiring" means this many days or fewer left
+
     # --- App ---
     ENVIRONMENT: str = "development"
     FRONTEND_URL: str = "http://localhost:3000"
