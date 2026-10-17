@@ -29,7 +29,8 @@ class OcrStatus(str, Enum):
 
 
 class DocumentStatus(str, Enum):
-    PROCESSING = "processing"
+    PENDING_UPLOAD = "pending_upload"   # record exists, file not confirmed yet
+    PROCESSING = "processing"           # file is in S3, waiting for OCR (Sprint 3)
     VALID = "valid"
     EXPIRING = "expiring"
     EXPIRED = "expired"
