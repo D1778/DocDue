@@ -8,7 +8,8 @@ from fastapi.responses import JSONResponse
 from app.api.router import api_router
 from app.core import database
 from app.core.config import settings
-from app.services import ocr_service
+from app.services import email_service, ocr_service, scheduler
+from app.services.reminder_rules import parse_milestones
 from app.services.storage_service import StorageError
 
 # Show our own INFO messages (like "OCR done for document ...") in the terminal
@@ -25,14 +26,19 @@ async def lifespan(app: FastAPI):
     except ocr_service.OcrUnavailable as exc:
         # The API still works; uploaded documents just go to "needs_review"
         logger.warning("OCR disabled: %s", exc)
+    # Fail fast with a clear message if the Sprint 4 settings are wrong
+    email_service.check_configuration()
+    parse_milestones(settings.REMINDER_DAYS)
+    scheduler.start_scheduler()   # the daily job
     yield
+    scheduler.stop_scheduler()
     await database.close_db()     # runs once at shutdown
 
 
 app = FastAPI(
     title="DocDue API",
     description="Document expiry tracking SaaS - backend API",
-    version="0.4.0",
+    version="0.5.0",
     lifespan=lifespan,
 )
 
