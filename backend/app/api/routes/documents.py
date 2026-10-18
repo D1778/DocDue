@@ -17,7 +17,7 @@ from app.schemas.document import (
     UploadUrlResponse,
     ViewUrlResponse,
 )
-from app.services import ocr_pipeline, storage_service
+from app.services import alerts, ocr_pipeline, storage_service
 from app.services.expiry import compute_status, to_utc_midnight
 
 router = APIRouter(prefix="/documents", tags=["Documents"])
@@ -187,6 +187,7 @@ async def update_document(
         document.suggested_expiry_date = None
         document.ocr_status = OcrStatus.MANUALLY_SET
         document.status = compute_status(stamp, settings.EXPIRING_SOON_DAYS)
+        await alerts.reset_alerts(document.id)    # the date changed: old reminders no longer apply
 
     document.updated_at = utcnow()
     await document.save()
@@ -209,7 +210,7 @@ async def reprocess_document(
         )
     if document.status == DocumentStatus.PROCESSING:
         return DocumentResponse.model_validate(document)     # already running
-
+    await alerts.reset_alerts(document.id)
     document.expiry_date = None
     document.suggested_expiry_date = None
     document.ocr_confidence = None

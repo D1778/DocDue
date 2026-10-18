@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 import pytest
 import pytest_asyncio
 from beanie import init_beanie
@@ -6,7 +8,8 @@ from pymongo import AsyncMongoClient
 
 from app.core.config import settings
 from app.models import ALL_MODELS
-from app.services import ocr_pipeline, storage_service
+from app.services import email_service, ocr_pipeline, storage_service
+from app.services.email_service import EmailError
 from main import app
 from tests.fake_storage import FakeStorage
 
@@ -52,3 +55,29 @@ def no_automatic_ocr(monkeypatch):
         return None
 
     monkeypatch.setattr(ocr_pipeline, "process_document", do_nothing)
+
+
+@pytest.fixture(autouse=True)
+def no_real_email(monkeypatch):
+    """Tests must never send a real email, whatever EMAIL_MODE says in your .env."""
+    monkeypatch.setattr(settings, "EMAIL_MODE", "console")
+
+
+class Outbox:
+    """Collects the emails the app tries to send. Set .fail = True to make sending fail."""
+
+    def __init__(self):
+        self.sent = []
+        self.fail = False
+
+    async def send_email(self, to, subject, text, html=None):
+        if self.fail:
+            raise EmailError("fake failure")
+        self.sent.append(SimpleNamespace(to=to, subject=subject, text=text, html=html))
+
+
+@pytest.fixture
+def outbox(monkeypatch):
+    box = Outbox()
+    monkeypatch.setattr(email_service, "send_email", box.send_email)
+    return box
