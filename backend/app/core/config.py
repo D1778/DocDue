@@ -37,6 +37,23 @@ class Settings(BaseSettings):
     OCR_LANG: str = "eng"                        # "eng+hin" if you installed Hindi data
     EXPIRING_SOON_DAYS: int = 30                 # "expiring" means this many days or fewer left
 
+    # --- Email (Sprint 4) ---
+    EMAIL_MODE: str = "console"                  # "console" = print in terminal, "smtp" = really send
+    EMAIL_FROM: str = "DocDue <no-reply@example.com>"
+    SMTP_HOST: Optional[str] = None
+    SMTP_PORT: int = 587
+    SMTP_SECURITY: str = "starttls"              # "starttls" (port 587), "ssl" (port 465) or "none"
+    SMTP_USERNAME: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+
+    # --- Daily job (Sprint 4) ---
+    SCHEDULER_ENABLED: bool = True
+    DAILY_JOB_HOUR_UTC: int = 3                  # 03:00 UTC is 08:30 in India
+    DAILY_JOB_MINUTE_UTC: int = 0
+    REMINDER_DAYS: str = "30,14,7,1,0"           # days before expiry; 0 = the expiry day and after
+    ORPHAN_AFTER_HOURS: int = 24                 # unfinished uploads older than this are removed
+    STUCK_PROCESSING_MINUTES: int = 10           # "processing" for longer than this is retried
+
     # --- App ---
     ENVIRONMENT: str = "development"
     FRONTEND_URL: str = "http://localhost:3000"
