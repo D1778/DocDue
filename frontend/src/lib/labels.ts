@@ -69,6 +69,26 @@ export const OCR_LABEL: Record<OcrStatus, string> = {
   manually_set: 'Entered by a person',
 };
 
+// The filled part of the "time used" bar on a document card.
+export const STATUS_BAR: Record<DocumentStatus, string> = {
+  pending_upload: 'bg-ink-300',
+  processing: 'bg-sky-400',
+  needs_review: 'bg-violet-400',
+  valid: 'bg-emerald-500',
+  expiring: 'bg-amber-500',
+  expired: 'bg-red-500',
+};
+
+// The round icon tile on a document card.
+export const STATUS_TILE: Record<DocumentStatus, string> = {
+  pending_upload: 'bg-ink-100 text-ink-600',
+  processing: 'bg-sky-50 text-sky-700',
+  needs_review: 'bg-violet-50 text-violet-700',
+  valid: 'bg-emerald-50 text-emerald-700',
+  expiring: 'bg-amber-50 text-amber-700',
+  expired: 'bg-red-50 text-red-700',
+};
+
 // The coloured stripe on the left edge of a document card.
 export const STATUS_STRIPE: Record<DocumentStatus, string> = {
   pending_upload: 'border-l-ink-300',

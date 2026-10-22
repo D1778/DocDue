@@ -69,6 +69,24 @@ export function expiryLine(
   return `${formatDate(iso)} · ${expiryText(iso, today)}`;
 }
 
+/**
+ * How much of the time between upload and expiry has gone, 0 to 100.
+ * Used for the little bar on document cards. null when there is no usable expiry date.
+ */
+export function lifeUsedPercent(
+  createdIso: string | null | undefined,
+  expiryIso: string | null | undefined,
+  today: string = todayUtc(),
+): number | null {
+  const start = datePart(createdIso);
+  const end = datePart(expiryIso);
+  if (!start || !end) return null;
+  const total = dayNumber(end) - dayNumber(start);
+  if (total <= 0) return 100;
+  const used = dayNumber(today) - dayNumber(start);
+  return Math.min(100, Math.max(0, Math.round((used / total) * 100)));
+}
+
 /** 1536000 -> "1.5 MB" */
 export function formatFileSize(bytes: number | null | undefined): string {
   if (bytes === null || bytes === undefined) return '';

@@ -131,7 +131,7 @@ export function Card({
   className?: string;
 }) {
   return (
-    <section className={`rounded-xl bg-white p-5 ring-1 ring-ink-200 ${className}`}>
+    <section className={`rounded-2xl bg-white/90 p-4 shadow-sm ring-1 ring-ink-200 backdrop-blur-sm sm:p-5 ${className}`}>
       {children}
     </section>
   );
@@ -149,7 +149,7 @@ export function PageHeader({
   return (
     <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 className="font-display text-3xl font-bold tracking-tight">{title}</h1>
+        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
         {subtitle && <p className="mt-1 text-sm text-ink-600">{subtitle}</p>}
       </div>
       {action}

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Bricolage_Grotesque, Public_Sans, Special_Elite } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
+import { SplashScreen } from '@/components/SplashScreen';
 
 // Three fonts, each with one job. Next.js downloads them at build time and serves them
 // from your own site, so visitors never contact Google.
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body
         className={`${display.variable} ${body.variable} ${stamp.variable} min-h-screen bg-paper font-sans text-ink-900 antialiased`}
       >
+        <SplashScreen />
         <Providers>{children}</Providers>
       </body>
     </html>
