@@ -1,8 +1,10 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import type { FormEvent } from 'react';
 import { Avatar } from '@/components/Avatar';
-import { Alert, Button, Card, PageHeader } from '@/components/ui';
+import { Alert, Button, Card, Field, PageHeader, TextInput } from '@/components/ui';
+import { passwordProblem } from '@/lib/validation';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { fileToAvatar, validateAvatarFile } from '@/lib/avatar';
@@ -30,6 +32,13 @@ export default function ProfilePage() {
     const action = useAction();
     const [saved, setSaved] = useState<string | null>(null);
 
+    const pwAction = useAction();
+    const [currentPw, setCurrentPw] = useState('');
+    const [newPw, setNewPw] = useState('');
+    const [newPwAgain, setNewPwAgain] = useState('');
+    const [pwSaved, setPwSaved] = useState<string | null>(null);
+    const [pwOpen, setPwOpen] = useState(false);
+
     const organization = tenant?.account_type === 'organization';
 
     const rows = [
@@ -55,6 +64,32 @@ export default function ProfilePage() {
             setSaved('Your picture is updated.');
         }
         if (picker.current) picker.current.value = ''; // so choosing the same file again still fires
+    }
+
+    function closePasswordForm() {
+        setPwOpen(false);
+        setCurrentPw('');
+        setNewPw('');
+        setNewPwAgain('');
+        pwAction.clearError();
+    }
+
+    async function onPassword(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        setPwSaved(null);
+        const problem = passwordProblem(newPw);
+        if (problem) return pwAction.fail(problem);
+        if (newPw !== newPwAgain) return pwAction.fail('The two passwords do not match.');
+        const updated = await pwAction.run(() =>
+            api.changePassword(newPw, user?.has_password ? currentPw : undefined),
+        );
+        if (updated) {
+            updateUser(updated);
+            closePasswordForm();
+            setPwSaved(
+                'Your password is saved. You can now log in with your email and this password.',
+            );
+        }
     }
 
     async function onRemove() {
@@ -153,6 +188,103 @@ export default function ProfilePage() {
                             ? 'The person who uploaded a document and the organization admins get the email, one a day.'
                             : 'Each reminder is sent once. If you change a date, its reminders start again.'}
                     </p>
+                </Card>
+
+                <Card className="lg:col-span-5">
+                    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+                        <div>
+                            <h2 className="font-display text-lg font-bold">Password</h2>
+                            {!user?.has_password && (
+                                <p className="mt-1 text-sm text-ink-600">
+                                    You signed up with Google, so you have no password yet. Set one to log in with your
+                                    email too.
+                                </p>
+                            )}
+                        </div>
+                        {!pwOpen && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setPwSaved(null);
+                                    setPwOpen(true);
+                                }}
+                                className="text-sm font-semibold text-brand-700 underline decoration-brand-300 decoration-2 underline-offset-4 transition hover:text-brand-900 hover:decoration-brand-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
+                            >
+                                {user?.has_password ? 'Change password' : 'Set a password'}
+                            </button>
+                        )}
+                    </div>
+
+                    {!pwOpen && pwSaved && (
+                        <div className="mt-4">
+                            <Alert kind="success">{pwSaved}</Alert>
+                        </div>
+                    )}
+
+                    {pwOpen && (
+                        <form
+                            onSubmit={(e) => void onPassword(e)}
+                            className="mt-5 grid max-w-3xl gap-4 border-t border-dashed border-ink-200 pt-5 sm:grid-cols-2"
+                            noValidate
+                        >
+                            {user?.has_password && (
+                                <div className="sm:col-span-2 sm:max-w-sm">
+                                    <Field label="Current password" htmlFor="current_password">
+                                        <TextInput
+                                            id="current_password"
+                                            type="password"
+                                            autoComplete="current-password"
+                                            autoFocus
+                                            value={currentPw}
+                                            onChange={(e) => setCurrentPw(e.target.value)}
+                                        />
+                                    </Field>
+                                </div>
+                            )}
+                            <Field label="New password" htmlFor="new_password" hint="At least 8 characters, with a letter and a number.">
+                                <TextInput
+                                    id="new_password"
+                                    type="password"
+                                    autoComplete="new-password"
+                                    autoFocus={!user?.has_password}
+                                    value={newPw}
+                                    onChange={(e) => setNewPw(e.target.value)}
+                                />
+                            </Field>
+                            <Field label="Type it again" htmlFor="new_password_again">
+                                <TextInput
+                                    id="new_password_again"
+                                    type="password"
+                                    autoComplete="new-password"
+                                    value={newPwAgain}
+                                    onChange={(e) => setNewPwAgain(e.target.value)}
+                                />
+                            </Field>
+                            <div className="sm:col-span-2">
+                                {pwAction.error && (
+                                    <div className="mb-3">
+                                        <Alert kind="error">{pwAction.error}</Alert>
+                                    </div>
+                                )}
+                                <div className="flex flex-wrap items-center gap-3">
+                                    <Button
+                                        type="submit"
+                                        loading={pwAction.busy}
+                                        disabled={!newPw || !newPwAgain || (!!user?.has_password && !currentPw)}
+                                    >
+                                        Save password
+                                    </Button>
+                                    <button
+                                        type="button"
+                                        onClick={closePasswordForm}
+                                        className="text-sm font-medium text-ink-600 underline underline-offset-4 hover:text-ink-900"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    )}
                 </Card>
 
                 <Card className="lg:col-span-5">

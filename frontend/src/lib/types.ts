@@ -33,6 +33,7 @@ export interface User {
     created_at: string;
     last_login_at: string | null;
     avatar: string | null; // small picture as a data URL
+    has_password: boolean; // false for Google sign-ups until they choose one
 }
 
 export interface Tenant {
