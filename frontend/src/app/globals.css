@@ -1,6 +1,76 @@
 @import "tailwindcss";
 
-/* DocDue uses Tailwind's default fonts and colours, so very little is needed here. */
+/* ---------- DocDue design tokens ----------
+   brand = "ledger green", the main colour.
+   ink   = green-tinted greys for text, borders and backgrounds.
+   paper = the page background.
+   Status colours (valid, expiring, expired) keep Tailwind's emerald, amber and red. */
+@theme {
+  --color-paper: #f2f4ee;
+  --color-brand-50: #f1f9f6;
+  --color-brand-100: #dff1eb;
+  --color-brand-200: #c1e2d7;
+  --color-brand-300: #98cdbb;
+  --color-brand-400: #64b99d;
+  --color-brand-500: #389f7c;
+  --color-brand-600: #258364;
+  --color-brand-700: #196b50;
+  --color-brand-800: #134e3a;
+  --color-brand-900: #0d3024;
+  --color-brand-950: #091b15;
+  --color-ink-50: #f6f8f7;
+  --color-ink-100: #ebefed;
+  --color-ink-200: #d7e0db;
+  --color-ink-300: #b6c3bd;
+  --color-ink-400: #85998f;
+  --color-ink-500: #61756b;
+  --color-ink-600: #495a52;
+  --color-ink-700: #36453d;
+  --color-ink-800: #25312b;
+  --color-ink-900: #17211c;
+  --color-ink-950: #0e1512;
+}
+
+/* The three fonts. layout.tsx loads them and sets the --font-* variables used here. */
+@theme inline {
+  --font-sans: var(--font-public-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-stamp: var(--font-special-elite), "Courier New", monospace;
+}
+
 html {
   color-scheme: light;
+}
+
+::selection {
+  background: var(--color-brand-200);
+  color: var(--color-brand-950);
+}
+
+/* One page-load moment: the stamps on the home page "land" one after another.
+   Visitors who ask their system for less motion see them already in place. */
+@keyframes stamp-land {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--r, -8deg)) scale(1.9);
+  }
+  55% {
+    opacity: 1;
+    transform: rotate(var(--r, -8deg)) scale(0.94);
+  }
+  100% {
+    opacity: 0.93;
+    transform: rotate(var(--r, -8deg)) scale(1);
+  }
+}
+
+.stamp {
+  transform: rotate(var(--r, -8deg));
+  opacity: 0.93;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .stamp-animate {
+    animation: stamp-land 0.55s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  }
 }
