@@ -18,7 +18,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     if (status === 'unreachable') {
         return (
             <div className="mx-auto mt-16 max-w-md space-y-4 px-4">
-                <Alert kind="error" title="Cannot reach DocDue">
+                <Alert kind="error" title="We can't connect right now">
                     {error}
                 </Alert>
                 <Button onClick={retry}>Try again</Button>
