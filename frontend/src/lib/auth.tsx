@@ -21,8 +21,10 @@ interface AuthValue {
   isAdmin: boolean;
   canManageTeam: boolean; // admins of organization accounts
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: (credential: string) => Promise<void>;
   register: (input: RegisterInput) => Promise<void>;
   logout: () => void;
+  updateUser: (user: User) => void; // after the profile picture changes
   retry: () => void;
 }
 
@@ -64,6 +66,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [mutate],
   );
 
+  const loginWithGoogle = useCallback(
+    async (credential: string) => {
+      const tokens = await api.googleLogin(credential);
+      saveTokens(tokens);
+      try {
+        mutate(await api.me());
+      } catch (err) {
+        clearTokens();
+        throw err;
+      }
+    },
+    [mutate],
+  );
+
   const register = useCallback(
     async (input: RegisterInput) => {
       const result = await api.register(input);
@@ -78,6 +94,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     mutate(null);
     router.replace('/login');
   }, [mutate, router]);
+
+  const current = session.data;
+  const updateUser = useCallback(
+    (user: User) => {
+      if (current) mutate({ ...current, user });
+    },
+    [current, mutate],
+  );
 
   const value = useMemo<AuthValue>(() => {
     const me = session.data;
@@ -97,11 +121,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAdmin,
       canManageTeam: isAdmin && tenant?.account_type === 'organization',
       login,
+      loginWithGoogle,
       register,
       logout,
+      updateUser,
       retry: reload,
     };
-  }, [session.data, session.error, login, register, logout, reload]);
+  }, [session.data, session.error, login, loginWithGoogle, register, logout, updateUser, reload]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    # --- Sign in with Google (optional) ---
+    GOOGLE_CLIENT_ID: Optional[str] = None       # from Google Cloud Console; empty = Google sign-in off
+
     # --- AWS S3 ---
     AWS_ACCESS_KEY_ID: str
     AWS_SECRET_ACCESS_KEY: str

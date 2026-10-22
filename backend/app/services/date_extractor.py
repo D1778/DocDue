@@ -22,15 +22,86 @@ DMY_TEXT = re.compile(rf"(?<!\d)(\d{{1,2}})(?:st|nd|rd|th)?[\s\-/.,]*({_MONTH_RE
 # Dec 31, 2027
 MDY_TEXT = re.compile(rf"\b({_MONTH_RE})[a-z]*\.?\s+(\d{{1,2}})(?:st|nd|rd|th)?,?\s+(\d{{4}})(?!\d)", re.I)
 
-EXPIRY_WORDS = ("expiry", "expires", "expire", "expiration", "valid until", "valid upto",
-                "valid up to", "valid till", "validity", "date of expiry", "exp date",
-                "exp.", "exp:", "renew before", "due date", "valid thru", "valid through",
-                "use before", "best before")
-ISSUE_WORDS = ("issue", "issued", "date of birth", "dob", "d.o.b", "birth", "born",
-               "date of issue", "doi", "printed", "dated", "invoice date", "mfg", "manufactured")
+# Documents name their expiry date in many ways. Plain phrases are matched as text; short
+# tokens that could sit inside other words ("exp", "doe") are matched as whole words.
+EXPIRY_WORDS = (
+    "expiry", "expires", "expire", "expired on", "expiring", "expiration", "exp.", "exp:",
+    "exp date", "exp dt", "expd", "date of exp",
+    "valid until", "valid upto", "valid up to", "valid till", "valid to", "valid thru",
+    "valid through", "valid before", "valid by", "validity", "date of validity", "valid on or before",
+    "good thru", "good through", "not valid after", "void after", "void on", "use before", "best before",
+    "renew before", "renew by", "renew on", "renewal date", "renewal due", "next renewal",
+    "next due", "due date", "due on", "due by", "retest due", "re test due",
+    "end date", "ends on", "ending on", "cover ends", "policy end", "policy ends",
+    "termination date", "lapse date", "lapses on", "last date",
+    "paid upto", "paid up to", "fitness upto", "fitness valid",
+)
+ISSUE_WORDS = (
+    "issue", "issued", "date of birth", "dob", "d.o.b", "birth", "born", "date of issue", "doi",
+    "printed", "dated", "invoice date", "mfg", "manufactured", "valid from", "effective from",
+    "effective date", "w.e.f", "wef", "start date", "starts on", "commencement", "inception",
+    "registered on", "registration date", "date of registration", "from date",
+)
 
-EXP_WORD = re.compile(r"\bexp\b")   # a bare "Exp" label
+EXP_WORD = re.compile(r"\b(?:exp|doe|d\.o\.e|e\.o\.d)\b")   # bare "Exp" / "DOE" labels
+# "Valid from 01/01/2024 to 31/12/2029": the date after "to" is the expiry date
+RANGE_JOIN = re.compile(r"^\W*(?:to|till|until|upto|up to|through|thru|and)\W*$|^\s*[-–—]\s*$")
+RANGE_START = re.compile(r"valid|validity|period|from|w\.?e\.?f|effective|cover|term")
+_SEPARATORS = re.compile(r"[\s_\-]+")
+
+
+def _norm(text: str) -> str:
+    """Lower-case and treat spaces, dashes and underscores alike ("Valid-Upto" == "valid upto")."""
+    return _SEPARATORS.sub(" ", text.lower())
+
+
 WINDOW = 45  # characters before a date that we look at for keywords
+
+
+_LABEL_RE = re.compile(
+    "|".join(
+        f"(?P<{kind}{i}>{re.escape(w)})"
+        for kind, words in (("e", EXPIRY_WORDS), ("i", ISSUE_WORDS))
+        for i, w in enumerate(sorted(words, key=len, reverse=True))
+    )
+)
+
+
+def _row_labels(line: str) -> list[str]:
+    """The labels in a table header row, left to right, as "expiry" or "issue"."""
+    return ["expiry" if m.lastgroup.startswith("e") else "issue" for m in _LABEL_RE.finditer(_norm(line))]
+
+
+def _table_roles(text: str, dates: list[tuple[date, int, int]]) -> dict[int, str]:
+    """Handle tables where a row of labels sits above a row of dates, e.g.
+
+        Issue Date   Validity (NT)   Validity (TR)
+        15-06-2023   16-08-2044
+
+    The n-th date on the lower line belongs to the n-th label above it.
+    Returns {start offset of the date: "expiry" | "issue"}.
+    """
+    roles: dict[int, str] = {}
+    lines: list[tuple[int, str]] = []
+    pos = 0
+    for line in text.split("\n"):
+        lines.append((pos, line))
+        pos += len(line) + 1
+    for n, (offset, line) in enumerate(lines):
+        if any(offset <= start < offset + len(line) for _, start, _ in dates):
+            continue                       # a line that already holds dates is not a header
+        labels = _row_labels(line)
+        if len(labels) < 2:
+            continue
+        nxt = next(((o, ln) for o, ln in lines[n + 1:n + 3] if ln.strip()), None)
+        if nxt is None:
+            continue
+        row = [d for d in dates if nxt[0] <= d[1] < nxt[0] + len(nxt[1])]
+        if not row or len(row) > len(labels):
+            continue
+        for (_, start, _), label in zip(row, labels):
+            roles[start] = label
+    return roles
 
 
 @dataclass(frozen=True)
@@ -95,13 +166,22 @@ def extract_expiry(text: str, today: date | None = None) -> ExtractionResult:
     if not dates:
         return ExtractionResult(None, 0.0, True)
 
+    roles = _table_roles(text, dates)
     cands: list[Candidate] = []
     prev_end = 0
-    for dt, start, end in dates:
+    prev_window = ""
+    for index, (dt, start, end) in enumerate(dates):
         # look only at the text between the previous date and this one, so a
         # keyword that belongs to the previous date cannot leak into this one
-        window = low[max(prev_end, start - WINDOW):start]
+        raw_window = low[max(prev_end, start - WINDOW):start]
+        window = _norm(raw_window)
+        in_range = (
+            index > 0
+            and RANGE_JOIN.match(low[prev_end:start]) is not None
+            and RANGE_START.search(prev_window) is not None
+        )
         prev_end = end
+        prev_window = window
         score, reason = 0, "date with no keyword"
         if any(w in window for w in EXPIRY_WORDS) or EXP_WORD.search(window):
             score += 60
@@ -109,6 +189,14 @@ def extract_expiry(text: str, today: date | None = None) -> ExtractionResult:
         if any(w in window for w in ISSUE_WORDS):
             score -= 40
             reason = "next to an issue/birth keyword"
+        role = roles.get(start)
+        if role == "expiry":
+            score, reason = 60, "under an expiry column heading"
+        elif role == "issue":
+            score, reason = -40, "under an issue column heading"
+        if in_range:
+            score = max(score, 0) + 60   # the end of a "from ... to ..." range
+            reason = "end of a validity range"
         if dt.year < 1990 or dt.year > today.year + 40:
             score -= 50
             reason += " (implausible year)"

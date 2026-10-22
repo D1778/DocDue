@@ -6,13 +6,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthShell } from '@/components/AuthShell';
 import { Alert, Button, Field, TextInput } from '@/components/ui';
+import { GoogleButton, OrDivider } from '@/components/GoogleButton';
 import { useAuth } from '@/lib/auth';
 import type { AccountType } from '@/lib/types';
 import { useAction } from '@/lib/useAction';
 import { emailLooksValid, passwordProblem } from '@/lib/validation';
 
 export default function RegisterPage() {
-  const { status, register } = useAuth();
+  const { status, register, loginWithGoogle } = useAuth();
   const router = useRouter();
   const action = useAction();
 
@@ -60,11 +61,23 @@ export default function RegisterPage() {
 
   const shownError = formError ?? action.error;
 
+  async function handleGoogle(credential: string) {
+    setFormError(null);
+    const ok = await action.run(async () => {
+      await loginWithGoogle(credential);
+      return true;
+    });
+    if (ok) router.replace('/documents');
+  }
+
   return (
     <AuthShell
       title="Create your account"
       subtitle="Free. Keep your documents in one place and get reminded before they expire."
     >
+      <GoogleButton onCredential={(c) => void handleGoogle(c)} onProblem={action.fail} text="signup_with" />
+      <p className="mt-2 text-center text-xs text-ink-500">Google sign-up creates a personal account.</p>
+      <OrDivider />
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         {shownError && <Alert kind="error">{shownError}</Alert>}
 

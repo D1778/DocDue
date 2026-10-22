@@ -6,6 +6,10 @@ from app.models.enums import AccountType
 from app.schemas.user import TenantResponse, UserResponse, validate_password_strength
 
 
+class GoogleLoginRequest(BaseModel):
+    credential: str = Field(min_length=20, max_length=4096)   # the ID token from Google
+
+
 class RegisterRequest(BaseModel):
     full_name: str = Field(min_length=2, max_length=100)
     email: EmailStr

@@ -18,6 +18,7 @@ class User(Document):
     is_active: bool = True
     created_at: datetime = Field(default_factory=utcnow)
     last_login_at: Optional[datetime] = None
+    avatar: Optional[str] = None  # small profile picture as a data URL, set by the user
 
     class Settings:
         name = "users"

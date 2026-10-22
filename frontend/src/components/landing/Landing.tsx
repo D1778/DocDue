@@ -2,7 +2,9 @@ import Link from 'next/link';
 import { EmailMock, LockArt, ScanMock, TeamMock, UploadArt } from '@/components/brand/Art';
 import { DocumentStack } from '@/components/brand/DocumentStack';
 import { Logo } from '@/components/brand/Logo';
+import { Backdrop } from '@/components/brand/Backdrop';
 import { ButtonLink } from '@/components/ui';
+import { ExpiryWordings, VaultSamples } from './SampleCards';
 
 // The public home page. It is a server component: no state, no hooks, just markup.
 
@@ -39,12 +41,14 @@ const LADDER: { label: string; note: string; dot: string }[] = [
 
 function Header() {
   return (
-    <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5">
+    <header className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-5 sm:py-5">
       <Link href="/" aria-label="DocDue home">
         <Logo />
       </Link>
-      <nav aria-label="Sections" className="hidden items-center gap-7 text-sm font-medium text-ink-700 md:flex">
+      <nav aria-label="Sections" className="hidden items-center gap-6 text-sm font-medium text-ink-700 lg:flex">
+        <a href="#vault" className="hover:text-brand-700">Your vault</a>
         <a href="#how" className="hover:text-brand-700">How it works</a>
+        <a href="#dates" className="hover:text-brand-700">Date reading</a>
         <a href="#features" className="hover:text-brand-700">What you get</a>
         <a href="#faq" className="hover:text-brand-700">Questions</a>
       </nav>
@@ -52,7 +56,10 @@ function Header() {
         <Link href="/login" className="rounded-lg px-3 py-2 text-sm font-medium text-ink-800 hover:bg-ink-100">
           Log in
         </Link>
-        <ButtonLink href="/register">Create account</ButtonLink>
+        <ButtonLink href="/register" className="whitespace-nowrap">
+          <span className="sm:hidden">Sign up</span>
+          <span className="hidden sm:inline">Create account</span>
+        </ButtonLink>
       </div>
     </header>
   );
@@ -158,6 +165,50 @@ function DashboardPreview() {
         ))}
       </ul>
     </div>
+  );
+}
+
+function Vault() {
+  return (
+    <section id="vault" className="mx-auto max-w-6xl scroll-mt-6 px-4 py-16 sm:px-5 lg:py-24">
+      <p className="font-stamp text-sm uppercase tracking-[0.2em] text-brand-700">Your vault</p>
+      <h2 className="mt-2 max-w-2xl font-display text-3xl font-bold leading-tight tracking-tight text-balance sm:text-5xl">
+        Every document, with its date up front
+      </h2>
+      <p className="mt-4 max-w-xl leading-relaxed text-ink-600">
+        Each document becomes a card: what it is, when it expires, how much time is left and how the
+        date was found.
+      </p>
+      <div className="mt-10">
+        <VaultSamples />
+      </div>
+    </section>
+  );
+}
+
+function Wordings() {
+  return (
+    <section id="dates" className="scroll-mt-6 border-y border-ink-200 bg-white/80 py-16 backdrop-blur-sm lg:py-24">
+      <div className="mx-auto max-w-6xl px-4 sm:px-5">
+        <p className="font-stamp text-sm uppercase tracking-[0.2em] text-brand-700">Smart date reading</p>
+        <h2 className="mt-2 max-w-3xl font-display text-3xl font-bold leading-tight tracking-tight text-balance sm:text-5xl">
+          Not every document says &ldquo;expiry&rdquo;
+        </h2>
+        <p className="mt-4 max-w-2xl leading-relaxed text-ink-600">
+          Licences say <em>validity</em>, insurance gives a period, permits say <em>renew before</em>.
+          DocDue knows the common wordings, and for a range such as &ldquo;01/04/2026 to
+          31/03/2027&rdquo; it takes the end date. Issue and birth dates are never mistaken for an
+          expiry date.
+        </p>
+        <div className="mt-10">
+          <ExpiryWordings />
+        </div>
+        <p className="mt-6 max-w-2xl text-sm text-ink-500">
+          If a document uses unusual words or shows two competing dates, DocDue does not guess. It
+          marks the document &ldquo;needs review&rdquo; and asks you.
+        </p>
+      </div>
+    </section>
   );
 }
 
@@ -290,17 +341,20 @@ function Footer() {
 
 export function Landing() {
   return (
-    <>
+    <div className="relative overflow-x-clip">
+      <Backdrop variant="landing" />
       <Header />
       {/* overflow-x-clip: the stamps start at 1.9x size while they land, which would otherwise widen the page on a phone */}
       <main className="overflow-x-clip">
         <Hero />
+        <Vault />
         <HowItWorks />
+        <Wordings />
         <Features />
         <Faq />
         <FinalCta />
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

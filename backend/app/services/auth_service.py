@@ -1,3 +1,4 @@
+import secrets
 from typing import Optional, Tuple
 
 from fastapi import HTTPException, status
@@ -9,6 +10,7 @@ from app.models.enums import AccountType, Role
 from app.models.tenant import Tenant
 from app.models.user import User
 from app.schemas.auth import RegisterRequest, TokenResponse
+from app.services.google_auth import GoogleProfile
 
 
 def _email_taken() -> HTTPException:
@@ -60,6 +62,39 @@ async def authenticate_user(email: str, password: str) -> Optional[User]:
     if tenant is None or not tenant.is_active:
         return None
 
+    user.last_login_at = utcnow()
+    await user.save()
+    return user
+
+
+async def login_or_register_google(profile: GoogleProfile) -> User:
+    """Log in the owner of a verified Google email, creating a personal account the first time."""
+    user = await User.find_one(User.email == profile.email)
+    if user is None:
+        tenant = Tenant(name=f"{profile.name}'s Vault", account_type=AccountType.PERSONAL)
+        await tenant.insert()
+        user = User(
+            tenant_id=tenant.id,
+            email=profile.email,
+            full_name=profile.name,
+            # Nobody knows this password: this account signs in with Google.
+            password_hash=security.hash_password(secrets.token_urlsafe(32)),
+            role=Role.ADMIN,
+            avatar=profile.picture,
+        )
+        try:
+            await user.insert()
+        except DuplicateKeyError:
+            await tenant.delete()
+            user = await User.find_one(User.email == profile.email)
+    if user is None or not user.is_active:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This account is switched off")
+    tenant = await Tenant.get(user.tenant_id)
+    if tenant is None or not tenant.is_active:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This account is switched off")
+
+    if not user.avatar and profile.picture:      # never replace a picture the user chose
+        user.avatar = profile.picture
     user.last_login_at = utcnow()
     await user.save()
     return user

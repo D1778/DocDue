@@ -59,8 +59,8 @@ describe('messageFromDetail', () => {
     });
 
     it('has friendly fallbacks', () => {
-        expect(messageFromDetail(undefined, 500)).toMatch(/server had a problem/);
-        expect(messageFromDetail(undefined, 404)).toBe('The request failed (code 404).');
+        expect(messageFromDetail(undefined, 500)).toMatch(/went wrong on our side/);
+        expect(messageFromDetail(undefined, 404)).toBe('Something went wrong. Please try again.');
     });
 });
 
@@ -111,7 +111,7 @@ describe('request', () => {
         };
         const error = (await request('/documents').catch((e: unknown) => e)) as ApiError;
         expect(error.status).toBe(0);
-        expect(error.message).toMatch(/Cannot reach the server/);
+        expect(error.message).toMatch(/can't connect right now/);
     });
 });
 

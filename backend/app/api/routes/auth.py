@@ -7,14 +7,15 @@ from app.core.utils import parse_object_id
 from app.models.tenant import Tenant
 from app.models.user import User
 from app.schemas.auth import (
+    GoogleLoginRequest,
     MeResponse,
     RefreshRequest,
     RegisterRequest,
     RegisterResponse,
     TokenResponse,
 )
-from app.schemas.user import TenantResponse, UserResponse
-from app.services import auth_service
+from app.schemas.user import AvatarUpdate, TenantResponse, UserResponse
+from app.services import auth_service, google_auth
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -42,6 +43,14 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
             detail="Incorrect email or password",
             headers=_UNAUTHORIZED_HEADERS,
         )
+    return auth_service.issue_tokens(user)
+
+
+@router.post("/google", response_model=TokenResponse)
+async def google_login(body: GoogleLoginRequest):
+    """Log in (or sign up) with a Google account whose email Google has verified."""
+    profile = await google_auth.verify_google_credential(body.credential)
+    user = await auth_service.login_or_register_google(profile)
     return auth_service.issue_tokens(user)
 
 
@@ -74,3 +83,18 @@ async def me(current_user: User = Depends(get_current_user)):
         user=UserResponse.model_validate(current_user),
         tenant=TenantResponse.model_validate(tenant),
     )
+
+
+@router.put("/me/avatar", response_model=UserResponse)
+async def set_avatar(body: AvatarUpdate, current_user: User = Depends(get_current_user)):
+    """Only ever changes the caller's own picture."""
+    current_user.avatar = body.avatar
+    await current_user.save()
+    return UserResponse.model_validate(current_user)
+
+
+@router.delete("/me/avatar", response_model=UserResponse)
+async def remove_avatar(current_user: User = Depends(get_current_user)):
+    current_user.avatar = None
+    await current_user.save()
+    return UserResponse.model_validate(current_user)

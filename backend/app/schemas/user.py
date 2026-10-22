@@ -7,6 +7,10 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 from app.models.enums import AccountType, Role
 
 
+MAX_AVATAR_CHARS = 150_000   # about 110 KB of image: a 256 px photo is far smaller
+AVATAR_PREFIXES = ("data:image/jpeg;base64,", "data:image/png;base64,", "data:image/webp;base64,")
+
+
 def validate_password_strength(value: str) -> str:
     if len(value.encode("utf-8")) > 72:
         raise ValueError("Password must be at most 72 bytes long")
@@ -26,6 +30,19 @@ class UserResponse(BaseModel):
     is_active: bool
     created_at: datetime
     last_login_at: Optional[datetime] = None
+    avatar: Optional[str] = None
+
+
+class AvatarUpdate(BaseModel):
+    """A profile picture the browser has already shrunk to a small square."""
+    avatar: str = Field(max_length=MAX_AVATAR_CHARS)
+
+    @field_validator("avatar")
+    @classmethod
+    def must_be_a_small_image(cls, v: str) -> str:
+        if not v.startswith(AVATAR_PREFIXES):
+            raise ValueError("Profile picture must be a JPEG, PNG or WebP image")
+        return v
 
 
 class TenantResponse(BaseModel):

@@ -38,9 +38,32 @@ def preprocess(img: Image.Image) -> Image.Image:
     return img.filter(ImageFilter.SHARPEN)
 
 
+OCR_CONFIG = "--psm 6"   # one uniform block; works well for ID cards and certificates
+GOOD_ENOUGH = 12         # readable words found in the upright image: no need to try rotations
+
+
+def _readable_words(img: Image.Image, lang: str) -> int:
+    """How many confidently read words (3+ letters) Tesseract finds. Sideways text scores near 0."""
+    data = pytesseract.image_to_data(img, lang=lang, config=OCR_CONFIG, output_type=pytesseract.Output.DICT)
+    return sum(
+        1
+        for text, conf in zip(data["text"], data["conf"])
+        if float(conf) >= 60 and sum(ch.isalpha() for ch in text) >= 3
+    )
+
+
 def ocr_image(img: Image.Image, lang: str = "eng") -> str:
-    # --psm 6: treat as one uniform block; works well for ID cards and certificates
-    return pytesseract.image_to_string(preprocess(img), lang=lang, config="--psm 6")
+    img = preprocess(img)
+    # A phone photo of a card is often taken sideways or upside down, and EXIF does not always
+    # say so. If the upright image reads badly, try the other three turns and keep the best.
+    best, best_score = img, _readable_words(img, lang)
+    if best_score < GOOD_ENOUGH:
+        for angle in (90, 270, 180):
+            turned = img.rotate(angle, expand=True)
+            score = _readable_words(turned, lang)
+            if score > best_score:
+                best, best_score = turned, score
+    return pytesseract.image_to_string(best, lang=lang, config=OCR_CONFIG)
 
 
 def ocr_image_bytes(data: bytes, lang: str = "eng") -> str:

@@ -32,6 +32,7 @@ export interface User {
     is_active: boolean;
     created_at: string;
     last_login_at: string | null;
+    avatar: string | null; // small picture as a data URL
 }
 
 export interface Tenant {
@@ -116,20 +117,4 @@ export interface NewMemberInput {
     email: string;
     password: string;
     role: Role;
-}
-
-// Sprint 4 admin endpoints
-export interface JobReport {
-    dry_run: boolean;
-    stuck_reprocessed: number;
-    orphans_deleted: number;
-    statuses_updated: number;
-    reminders_due: number;
-    emails_sent: number;
-    emails_failed: number;
-}
-
-export interface EmailTestResult {
-    mode: string;
-    sent_to: string;
 }
