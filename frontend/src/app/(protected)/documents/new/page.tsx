@@ -97,8 +97,8 @@ export default function UploadPage() {
           }}
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}
-          className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 text-center transition has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-indigo-600 ${
-            dragging ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 bg-white hover:border-indigo-400'
+          className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 text-center transition has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-600 ${
+            dragging ? 'border-brand-500 bg-brand-50' : 'border-ink-300 bg-white hover:border-brand-400'
           } ${uploading ? 'pointer-events-none opacity-60' : ''}`}
         >
           <input
@@ -112,14 +112,14 @@ export default function UploadPage() {
           {file ? (
             <>
               <span className="font-medium">{file.name}</span>
-              <span className="mt-1 text-sm text-slate-500">
+              <span className="mt-1 text-sm text-ink-500">
                 {formatFileSize(file.size)} · click to choose a different file
               </span>
             </>
           ) : (
             <>
               <span className="font-medium">Drop a file here, or click to choose one</span>
-              <span className="mt-1 text-sm text-slate-500">PDF, JPEG or PNG</span>
+              <span className="mt-1 text-sm text-ink-500">PDF, JPEG or PNG</span>
             </>
           )}
         </label>
@@ -173,12 +173,12 @@ export default function UploadPage() {
                           ✓
                         </span>
                       ) : current ? (
-                        <Spinner className="text-indigo-600" />
+                        <Spinner className="text-brand-600" />
                       ) : (
-                        <span aria-hidden="true" className="size-2 rounded-full bg-slate-300" />
+                        <span aria-hidden="true" className="size-2 rounded-full bg-ink-300" />
                       )}
                     </span>
-                    <span className={current ? 'font-medium' : done ? 'text-slate-500' : 'text-slate-400'}>
+                    <span className={current ? 'font-medium' : done ? 'text-ink-500' : 'text-ink-400'}>
                       {step.label}
                       {current && step.stage === 'uploading' ? ` (${percent}%)` : ''}
                     </span>
@@ -188,13 +188,13 @@ export default function UploadPage() {
             </ol>
             {stage === 'uploading' && (
               <div
-                className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200"
+                className="mt-4 h-2 overflow-hidden rounded-full bg-ink-200"
                 role="progressbar"
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-valuenow={percent}
               >
-                <div className="h-full bg-indigo-600 transition-all" style={{ width: `${percent}%` }} />
+                <div className="h-full bg-brand-600 transition-all" style={{ width: `${percent}%` }} />
               </div>
             )}
           </Card>

@@ -67,9 +67,9 @@ export default function LoginPage() {
                 </Button>
             </form>
 
-            <p className="mt-6 text-center text-sm text-slate-600">
+            <p className="mt-6 text-center text-sm text-ink-600">
                 New to DocDue?{' '}
-                <Link href="/register" className="font-medium text-indigo-700 hover:underline">
+                <Link href="/register" className="font-medium text-brand-700 hover:underline">
                     Create an account
                 </Link>
             </p>

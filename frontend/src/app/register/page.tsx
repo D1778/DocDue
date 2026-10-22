@@ -69,7 +69,7 @@ export default function RegisterPage() {
         {shownError && <Alert kind="error">{shownError}</Alert>}
 
         <fieldset>
-          <legend className="mb-1 block text-sm font-medium text-slate-700">Account type</legend>
+          <legend className="mb-1 block text-sm font-medium text-ink-700">Account type</legend>
           <div className="grid grid-cols-2 gap-2">
             {(
               [
@@ -79,10 +79,10 @@ export default function RegisterPage() {
             ).map((option) => (
               <label
                 key={option.value}
-                className={`cursor-pointer rounded-lg p-3 text-sm ring-1 ring-inset has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-indigo-600 ${
+                className={`cursor-pointer rounded-lg p-3 text-sm ring-1 ring-inset has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brand-600 ${
                   accountType === option.value
-                    ? 'bg-indigo-50 ring-2 ring-indigo-600'
-                    : 'bg-white ring-slate-300 hover:bg-slate-50'
+                    ? 'bg-brand-50 ring-2 ring-brand-600'
+                    : 'bg-white ring-ink-300 hover:bg-ink-50'
                 }`}
               >
                 <input
@@ -94,7 +94,7 @@ export default function RegisterPage() {
                   className="sr-only"
                 />
                 <span className="block font-medium">{option.title}</span>
-                <span className="block text-slate-500">{option.text}</span>
+                <span className="block text-ink-500">{option.text}</span>
               </label>
             ))}
           </div>
@@ -149,9 +149,9 @@ export default function RegisterPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-600">
+      <p className="mt-6 text-center text-sm text-ink-600">
         Already have an account?{' '}
-        <Link href="/login" className="font-medium text-indigo-700 hover:underline">
+        <Link href="/login" className="font-medium text-brand-700 hover:underline">
           Log in
         </Link>
       </p>
