@@ -92,7 +92,7 @@ export default function TeamPage() {
       {team.data && (
         <Card className="mb-6 overflow-x-auto p-0">
           <table className="w-full min-w-[32rem] text-left text-sm">
-            <thead className="border-b border-slate-200 text-slate-500">
+            <thead className="border-b border-ink-200 text-ink-500">
               <tr>
                 <th className="px-4 py-3 font-medium">Name</th>
                 <th className="px-4 py-3 font-medium">Email</th>
@@ -100,13 +100,13 @@ export default function TeamPage() {
                 <th className="px-4 py-3 font-medium">Last login</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-ink-100">
               {team.data.map((member) => (
                 <tr key={member.id}>
                   <td className="px-4 py-3 font-medium">{member.full_name}</td>
                   <td className="px-4 py-3">{member.email}</td>
                   <td className="px-4 py-3 capitalize">{member.role}</td>
-                  <td className="px-4 py-3 text-slate-500">
+                  <td className="px-4 py-3 text-ink-500">
                     {member.last_login_at ? formatDateTime(member.last_login_at) : 'Never'}
                   </td>
                 </tr>
@@ -117,7 +117,7 @@ export default function TeamPage() {
       )}
 
       <Card className="max-w-xl">
-        <h2 className="text-base font-semibold">Add a team member</h2>
+        <h2 className="font-display text-lg font-bold">Add a team member</h2>
         <form onSubmit={handleSubmit} className="mt-4 space-y-4" noValidate>
           {notice && <Alert kind="success">{notice}</Alert>}
           {shownError && <Alert kind="error">{shownError}</Alert>}

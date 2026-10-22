@@ -4,6 +4,8 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { Stamp } from '@/components/brand/Stamp';
+import type { StampTone } from '@/components/brand/Stamp';
 import { StatusBadge } from '@/components/StatusBadge';
 import {
   Alert,
@@ -25,12 +27,20 @@ import {
   formatDateTime,
   formatFileSize,
 } from '@/lib/format';
-import { OCR_LABEL, TYPE_LABEL, TYPE_OPTIONS } from '@/lib/labels';
-import type { DocumentType } from '@/lib/types';
+import { OCR_LABEL, STATUS_LABEL, TYPE_LABEL, TYPE_OPTIONS } from '@/lib/labels';
+import type { DocumentStatus, DocumentType } from '@/lib/types';
 import { useAction } from '@/lib/useAction';
 import { useResource } from '@/lib/useResource';
 
 type Confirm = 'reprocess' | 'delete' | null;
+
+// Statuses that are shown as a rubber stamp. The others (still reading, upload not finished) keep a plain badge.
+const STAMP_TONE: Partial<Record<DocumentStatus, StampTone>> = {
+  valid: 'valid',
+  expiring: 'expiring',
+  expired: 'expired',
+  needs_review: 'review',
+};
 
 export default function DocumentDetailPage() {
   const params = useParams<{ id: string }>();
@@ -66,7 +76,7 @@ export default function DocumentDetailPage() {
         <Alert kind="error" title={notFound ? 'Document not found' : 'Could not load this document'}>
           {notFound ? 'It may have been deleted, or it belongs to another account.' : doc.error}
         </Alert>
-        <Link href="/documents" className="text-sm font-medium text-indigo-700 hover:underline">
+        <Link href="/documents" className="text-sm font-medium text-brand-700 hover:underline">
           Back to your documents
         </Link>
       </div>
@@ -163,20 +173,26 @@ export default function DocumentDetailPage() {
 
   return (
     <div className="space-y-5">
-      <Link href="/documents" className="text-sm font-medium text-indigo-700 hover:underline">
+      <Link href="/documents" className="text-sm font-medium text-brand-700 hover:underline">
         ← Back to your documents
       </Link>
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="break-words text-2xl font-semibold tracking-tight">{d.title}</h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <h1 className="break-words font-display text-3xl font-bold tracking-tight">{d.title}</h1>
+          <p className="mt-1 text-sm text-ink-600">
             {TYPE_LABEL[d.document_type]}
             {d.original_filename ? ` · ${d.original_filename}` : ''}
             {d.file_size ? ` · ${formatFileSize(d.file_size)}` : ''}
           </p>
         </div>
-        <StatusBadge status={d.status} />
+        {STAMP_TONE[d.status] ? (
+          <Stamp tone={STAMP_TONE[d.status] as StampTone} rotate={-4}>
+            {STATUS_LABEL[d.status]}
+          </Stamp>
+        ) : (
+          <StatusBadge status={d.status} />
+        )}
       </div>
 
       {doc.error && <Alert kind="error">{doc.error}</Alert>}
@@ -214,12 +230,12 @@ export default function DocumentDetailPage() {
 
       {/* Expiry date */}
       <Card>
-        <h2 className="text-base font-semibold">Expiry date</h2>
-        <p className="mt-2 text-2xl font-semibold">
+        <h2 className="font-display text-lg font-bold">Expiry date</h2>
+        <p className="mt-2 font-display text-4xl font-bold tracking-tight">
           {d.expiry_date ? formatDate(d.expiry_date) : 'Not set'}
         </p>
-        {d.expiry_date && <p className="text-sm text-slate-600">{expiryText(d.expiry_date)}</p>}
-        <p className="mt-1 text-xs text-slate-500">
+        {d.expiry_date && <p className="text-sm text-ink-600">{expiryText(d.expiry_date)}</p>}
+        <p className="mt-1 text-xs text-ink-500">
           {OCR_LABEL[d.ocr_status]}
           {d.ocr_status === 'auto_detected' && d.ocr_confidence !== null
             ? ` (${Math.round(d.ocr_confidence * 100)}% sure)`
@@ -257,7 +273,7 @@ export default function DocumentDetailPage() {
             </Field>
           </form>
         ) : (
-          <p className="mt-4 text-sm text-slate-500">
+          <p className="mt-4 text-sm text-ink-500">
             Only the person who uploaded this document, or an admin, can change it.
           </p>
         )}
@@ -265,7 +281,7 @@ export default function DocumentDetailPage() {
 
       {/* File */}
       <Card>
-        <h2 className="text-base font-semibold">File</h2>
+        <h2 className="font-display text-lg font-bold">File</h2>
         {fileAction.error && (
           <div className="mt-3">
             <Alert kind="error">{fileAction.error}</Alert>
@@ -279,14 +295,14 @@ export default function DocumentDetailPage() {
             Download
           </Button>
         </div>
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-2 text-xs text-ink-500">
           The link works for a few minutes only, so it stays private.
         </p>
       </Card>
 
       {/* Details */}
       <Card>
-        <h2 className="text-base font-semibold">Details</h2>
+        <h2 className="font-display text-lg font-bold">Details</h2>
         {canEdit ? (
           <form onSubmit={handleDetailsSubmit} className="mt-3 space-y-4">
             {detailsAction.error && <Alert kind="error">{detailsAction.error}</Alert>}
@@ -324,11 +340,11 @@ export default function DocumentDetailPage() {
         ) : null}
         <dl className="mt-4 grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
           <div>
-            <dt className="text-slate-500">Uploaded</dt>
+            <dt className="text-ink-500">Uploaded</dt>
             <dd>{formatDateTime(d.created_at)}</dd>
           </div>
           <div>
-            <dt className="text-slate-500">Last changed</dt>
+            <dt className="text-ink-500">Last changed</dt>
             <dd>{formatDateTime(d.updated_at)}</dd>
           </div>
         </dl>
@@ -337,7 +353,7 @@ export default function DocumentDetailPage() {
       {/* Danger zone */}
       {canEdit && (
         <Card className="border-red-200">
-          <h2 className="text-base font-semibold">More actions</h2>
+          <h2 className="font-display text-lg font-bold">More actions</h2>
           {dangerAction.error && (
             <div className="mt-3">
               <Alert kind="error">{dangerAction.error}</Alert>

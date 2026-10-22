@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { EmptyTrayArt } from '@/components/brand/Art';
 import { DocumentCard } from '@/components/DocumentCard';
 import { Alert, ButtonLink, FullPageSpinner, PageHeader, Pagination, Select } from '@/components/ui';
 import { api } from '@/lib/api';
@@ -75,16 +76,16 @@ export default function DocumentsPage() {
               type="button"
               aria-pressed={active}
               onClick={() => chooseStatus(active ? '' : tileStatus)}
-              className={`rounded-xl p-4 text-left shadow-sm transition focus-visible:outline-2 focus-visible:outline-indigo-600 ${
+              className={`rounded-xl p-4 text-left shadow-sm transition focus-visible:outline-2 focus-visible:outline-brand-600 ${
                 active
-                  ? 'bg-indigo-50 ring-2 ring-indigo-600'
-                  : 'bg-white ring-1 ring-slate-200 hover:ring-indigo-300'
+                  ? 'bg-brand-50 ring-2 ring-brand-700'
+                  : 'bg-white ring-1 ring-ink-200 hover:ring-brand-400'
               }`}
             >
-              <span className={`block text-2xl font-semibold ${TILE_NUMBER_STYLE[tileStatus]}`}>
+              <span className={`block font-display text-4xl font-bold leading-none ${TILE_NUMBER_STYLE[tileStatus]}`}>
                 {counts.data ? counts.data[tileStatus] : '-'}
               </span>
-              <span className="block text-sm text-slate-600">{STATUS_LABEL[tileStatus]}</span>
+              <span className="mt-2 block text-sm text-ink-600">{STATUS_LABEL[tileStatus]}</span>
             </button>
           );
         })}
@@ -123,7 +124,7 @@ export default function DocumentsPage() {
         {filtered && (
           <button
             type="button"
-            className="text-sm font-medium text-indigo-700 hover:underline"
+            className="text-sm font-medium text-brand-700 hover:underline"
             onClick={() => {
               chooseStatus('');
               chooseType('');
@@ -145,11 +146,12 @@ export default function DocumentsPage() {
       {!data && !list.error && <FullPageSpinner label="Loading your documents..." />}
 
       {data && data.items.length === 0 && (
-        <div className="rounded-xl border-2 border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-          <p className="font-medium">
+        <div className="rounded-xl border-2 border-dashed border-ink-300 bg-white px-6 py-12 text-center">
+          <EmptyTrayArt className="mx-auto mb-4 h-28 w-auto" />
+          <p className="font-display text-xl font-bold">
             {filtered ? 'No documents match these filters.' : 'You have no documents yet.'}
           </p>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-ink-600">
             {filtered
               ? 'Try removing a filter.'
               : 'Upload a licence, certificate or ID and DocDue will find its expiry date.'}

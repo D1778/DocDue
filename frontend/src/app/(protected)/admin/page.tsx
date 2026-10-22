@@ -55,8 +55,8 @@ export default function AdminToolsPage() {
 
             <div className="grid gap-6 lg:grid-cols-2">
                 <Card>
-                    <h2 className="text-base font-semibold">Send a test email</h2>
-                    <p className="mt-1 text-sm text-slate-600">
+                    <h2 className="font-display text-lg font-bold">Send a test email</h2>
+                    <p className="mt-1 text-sm text-ink-600">
                         Sends one email to your own address, to prove the email settings work.
                     </p>
                     <div className="mt-4 space-y-3">
@@ -75,8 +75,8 @@ export default function AdminToolsPage() {
                 </Card>
 
                 <Card>
-                    <h2 className="text-base font-semibold">Run the daily job now</h2>
-                    <p className="mt-1 text-sm text-slate-600">
+                    <h2 className="font-display text-lg font-bold">Run the daily job now</h2>
+                    <p className="mt-1 text-sm text-ink-600">
                         Updates statuses, removes unfinished uploads and sends reminder emails. It runs by itself
                         every day; use this to test it.
                     </p>
@@ -84,7 +84,7 @@ export default function AdminToolsPage() {
                         <label className="flex items-start gap-2 text-sm">
                             <input
                                 type="checkbox"
-                                className="mt-0.5 size-4 rounded border-slate-300 text-indigo-600"
+                                className="mt-0.5 size-4 rounded border-ink-300 text-brand-600"
                                 checked={dryRun}
                                 onChange={(e) => setDryRun(e.target.checked)}
                             />
@@ -108,10 +108,10 @@ export default function AdminToolsPage() {
                             <h3 className="mb-2 text-sm font-semibold">
                                 Result {report.dry_run ? '(dry run: nothing was changed)' : '(real run)'}
                             </h3>
-                            <dl className="divide-y divide-slate-100 rounded-lg ring-1 ring-slate-200">
+                            <dl className="divide-y divide-ink-100 rounded-lg ring-1 ring-ink-200">
                                 {REPORT_ROWS.map((row) => (
                                     <div key={row.key} className="flex justify-between px-3 py-2 text-sm">
-                                        <dt className="text-slate-600">{row.label}</dt>
+                                        <dt className="text-ink-600">{row.label}</dt>
                                         <dd className="font-medium">{report[row.key]}</dd>
                                     </div>
                                 ))}
