@@ -16,6 +16,19 @@ TODAY = date(2026, 10, 17)
     ("Exp 31.12.27", date(2027, 12, 31)),
     ("Date of Expiry: 7th March 2029", date(2029, 3, 7)),
     ("Issued 01/01/2020  Expiry 01/01/2030  Renew 01/06/2031", date(2030, 1, 1)),
+    ("Validity 12/03/2035", date(2035, 3, 12)),
+    ("Valid-Upto: 15/08/2031", date(2031, 8, 15)),
+    ("Valid from 01/01/2024 to 31/12/2029", date(2029, 12, 31)),
+    ("Period of insurance 01/04/2026 to 31/03/2027", date(2027, 3, 31)),
+    ("Policy start date 01/04/2026  Policy end date 31/03/2027", date(2027, 3, 31)),
+    ("Date of registration 01/01/2015  Fitness upto 31/12/2030", date(2030, 12, 31)),
+    ("Renewal date: 14 Mar 2031", date(2031, 3, 14)),
+    ("DOE 09/09/2032", date(2032, 9, 9)),
+    ("Use before 01-06-2030", date(2030, 6, 1)),
+    # labels in one row, dates in the row below (Indian driving licence)
+    ("DL No. KL59 20230004502\nIssue Date Validity (NT) Validity (TR)\n15-06-2023 16-08-2044\n"
+     "Date Of Birth: 17-08-2004\nDate Of First Issue 15-06-2023", date(2044, 8, 16)),
+    ("Issue Date   Validity(NT)   Validity(TR)\n\n15-06-2023   16-08-2044", date(2044, 8, 16)),
 ])
 def test_confident_expiry_dates(text, expected):
     result = extract_expiry(text, TODAY)
