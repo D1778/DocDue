@@ -18,6 +18,8 @@ class User(Document):
     is_active: bool = True
     created_at: datetime = Field(default_factory=utcnow)
     last_login_at: Optional[datetime] = None
+    # False for accounts made with Google sign-in until the person chooses a password
+    has_password: bool = True
     avatar: Optional[str] = None  # small profile picture as a data URL, set by the user
 
     class Settings:

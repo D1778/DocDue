@@ -170,3 +170,79 @@ def test_only_google_image_addresses_are_kept():
     assert google_auth.safe_picture("http://lh3.googleusercontent.com/a/x") is None
     assert google_auth.safe_picture("https://evil.example.com/a.jpg") is None
     assert google_auth.safe_picture(None) is None
+
+
+# ---------- change / set password, forgot password ----------
+
+import re  # noqa: E402
+
+
+async def _token(client, email):
+    return (await register_user(client, email)).json()["tokens"]["access_token"]
+
+
+async def test_change_password_needs_the_current_one(client):
+    token = await _token(client, "chg@example.com")
+    bad = await client.put("/api/v1/auth/me/password", headers=auth_header(token),
+                           json={"current_password": "Wrong@1234", "new_password": "Brand@5678"})
+    assert bad.status_code == 400
+    ok = await client.put("/api/v1/auth/me/password", headers=auth_header(token),
+                          json={"current_password": "Test@1234", "new_password": "Brand@5678"})
+    assert ok.status_code == 200
+    assert (await login(client, "chg@example.com", "Brand@5678")).status_code == 200
+    assert (await login(client, "chg@example.com", "Test@1234")).status_code == 401
+
+
+async def test_google_account_can_set_a_password_without_a_current_one(client, monkeypatch):
+    _fake_google(monkeypatch, email="gset@gmail.com")
+    token = (await client.post("/api/v1/auth/google", json={"credential": "x" * 30})).json()["access_token"]
+    me = (await client.get("/api/v1/auth/me", headers=auth_header(token))).json()
+    assert me["user"]["has_password"] is False
+    assert (await login(client, "gset@gmail.com", "Brand@5678")).status_code == 401
+
+    resp = await client.put("/api/v1/auth/me/password", headers=auth_header(token),
+                            json={"new_password": "Brand@5678"})
+    assert resp.status_code == 200
+    assert resp.json()["has_password"] is True
+    assert (await login(client, "gset@gmail.com", "Brand@5678")).status_code == 200
+
+
+async def test_forgot_password_answers_the_same_for_unknown_emails(client, outbox):
+    await register_user(client, "known@example.com")
+    known = await client.post("/api/v1/auth/forgot-password", json={"email": "known@example.com"})
+    unknown = await client.post("/api/v1/auth/forgot-password", json={"email": "nobody@example.com"})
+    assert known.status_code == unknown.status_code == 200
+    assert known.json() == unknown.json()
+    assert [m.to for m in outbox.sent] == ["known@example.com"]
+    assert outbox.sent[0].subject == "Reset your DocDue password"
+
+
+async def test_reset_link_changes_the_password_once(client, outbox):
+    await register_user(client, "reset@example.com")
+    await client.post("/api/v1/auth/forgot-password", json={"email": "reset@example.com"})
+    token = re.search(r"token=(\S+)", outbox.sent[0].text).group(1)
+
+    resp = await client.post("/api/v1/auth/reset-password", json={"token": token, "new_password": "Fresh@9999"})
+    assert resp.status_code == 200
+    assert (await login(client, "reset@example.com", "Fresh@9999")).status_code == 200
+    assert (await login(client, "reset@example.com", "Test@1234")).status_code == 401
+
+    again = await client.post("/api/v1/auth/reset-password", json={"token": token, "new_password": "Other@1111"})
+    assert again.status_code == 400            # the same link cannot be used twice
+
+
+async def test_reset_rejects_bad_tokens_and_weak_passwords(client, outbox):
+    bad = await client.post("/api/v1/auth/reset-password",
+                            json={"token": "x" * 40, "new_password": "Fresh@9999"})
+    assert bad.status_code == 400
+    await register_user(client, "weak2@example.com")
+    await client.post("/api/v1/auth/forgot-password", json={"email": "weak2@example.com"})
+    token = re.search(r"token=(\S+)", outbox.sent[0].text).group(1)
+    weak = await client.post("/api/v1/auth/reset-password", json={"token": token, "new_password": "abcdefgh"})
+    assert weak.status_code == 422
+
+
+async def test_an_access_token_cannot_be_used_as_a_reset_link(client):
+    access = await _token(client, "mix@example.com")
+    resp = await client.post("/api/v1/auth/reset-password", json={"token": access, "new_password": "Fresh@9999"})
+    assert resp.status_code == 400

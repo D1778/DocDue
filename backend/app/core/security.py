@@ -1,3 +1,4 @@
+import hashlib
 import uuid
 from datetime import timedelta
 
@@ -9,6 +10,8 @@ from app.core.utils import utcnow
 
 ACCESS = "access"
 REFRESH = "refresh"
+RESET = "reset"
+RESET_TOKEN_MINUTES = 30
 
 
 class TokenError(Exception):
@@ -60,6 +63,25 @@ def create_refresh_token(*, user_id: str, tenant_id: str, role: str) -> str:
         user_id=user_id, tenant_id=tenant_id, role=role, token_type=REFRESH,
         expires_delta=timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
     )
+
+
+def password_fingerprint(password_hash: str) -> str:
+    """A short code that changes whenever the password changes. Ties a reset link to ONE password."""
+    return hashlib.sha256(password_hash.encode("utf-8")).hexdigest()[:20]
+
+
+def create_reset_token(*, user_id: str, password_hash: str) -> str:
+    """A link token that works once: after the password changes, the fingerprint no longer matches."""
+    now = utcnow()
+    claims = {
+        "sub": user_id,
+        "type": RESET,
+        "fp": password_fingerprint(password_hash),
+        "jti": uuid.uuid4().hex,
+        "iat": now,
+        "exp": now + timedelta(minutes=RESET_TOKEN_MINUTES),
+    }
+    return jwt.encode(claims, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
 def decode_token(token: str, expected_type: str) -> dict:
