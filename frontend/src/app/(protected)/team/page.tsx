@@ -149,7 +149,7 @@ export default function TeamPage() {
           <Field
             label="Role"
             htmlFor="member_role"
-            hint="Admins can edit every document and see the admin tools. Members edit their own documents."
+            hint="Admins can edit every document. Members edit their own documents."
           >
             <Select id="member_role" value={role} onChange={(e) => setRole(e.target.value as Role)}>
               <option value="member">Member</option>

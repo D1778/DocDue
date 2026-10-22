@@ -8,8 +8,6 @@ import type {
     DocumentStatus,
     DocumentType,
     DocumentUpdate,
-    EmailTestResult,
-    JobReport,
     MeResponse,
     NewMemberInput,
     RegisterInput,
@@ -63,8 +61,8 @@ export function messageFromDetail(detail: unknown, status: number): string {
         if (parts.length > 0) return parts.join(' ');
     }
 
-    if (status >= 500) return 'The server had a problem. Please try again in a moment.';
-    return `The request failed (code ${status}).`;
+    if (status >= 500) return 'Something went wrong on our side. Please try again in a moment.';
+    return 'Something went wrong. Please try again.';
 }
 
 export function errorMessage(err: unknown): string {
@@ -121,7 +119,7 @@ async function send(path: string, opts: RequestOptions, token?: string): Promise
     } catch {
         throw new ApiError(
             0,
-            'Cannot reach the server. Check that the backend is running and that you are online.',
+            "We can't connect right now. Please check your internet connection and try again.",
         );
     }
 }
@@ -210,6 +208,10 @@ export const api = {
     register: (input: RegisterInput) =>
         request<RegisterResponse>('/auth/register', { method: 'POST', auth: false, body: input }),
     me: () => request<MeResponse>('/auth/me'),
+    googleLogin: (credential: string) =>
+        request<Tokens>('/auth/google', { method: 'POST', auth: false, body: { credential } }),
+    setAvatar: (avatar: string) => request<User>('/auth/me/avatar', { method: 'PUT', body: { avatar } }),
+    removeAvatar: () => request<User>('/auth/me/avatar', { method: 'DELETE' }),
 
     // documents
     listDocuments: (params: ListParams = {}) =>
@@ -230,12 +232,4 @@ export const api = {
     // team (admins of organizations)
     listUsers: () => request<User[]>('/users'),
     createUser: (input: NewMemberInput) => request<User>('/users', { method: 'POST', body: input }),
-
-    // Sprint 4 admin tools
-    runDailyJob: (dryRun: boolean) =>
-        request<JobReport>('/maintenance/run-daily-job', {
-            method: 'POST',
-            query: { dry_run: dryRun },
-        }),
-    sendTestEmail: () => request<EmailTestResult>('/maintenance/test-email', { method: 'POST' }),
 };

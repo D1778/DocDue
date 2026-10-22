@@ -6,11 +6,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthShell } from '@/components/AuthShell';
 import { Alert, Button, Field, TextInput } from '@/components/ui';
+import { GoogleButton, OrDivider } from '@/components/GoogleButton';
 import { useAuth } from '@/lib/auth';
 import { useAction } from '@/lib/useAction';
 
 export default function LoginPage() {
-    const { status, login } = useAuth();
+    const { status, login, loginWithGoogle } = useAuth();
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -30,8 +31,18 @@ export default function LoginPage() {
         if (ok) router.replace('/documents');
     }
 
+    async function handleGoogle(credential: string) {
+        const ok = await action.run(async () => {
+            await loginWithGoogle(credential);
+            return true;
+        });
+        if (ok) router.replace('/documents');
+    }
+
     return (
         <AuthShell title="Log in" subtitle="Welcome back. Enter your details to see your documents.">
+            <GoogleButton onCredential={(c) => void handleGoogle(c)} onProblem={action.fail} text="signin_with" />
+            <OrDivider />
             <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                 {action.error && <Alert kind="error">{action.error}</Alert>}
 

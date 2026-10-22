@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
+import { Backdrop } from './brand/Backdrop';
 import { DocumentStack } from './brand/DocumentStack';
 import { Logo } from './brand/Logo';
 
@@ -17,19 +18,24 @@ export function AuthShell({
   return (
     <div className="grid min-h-screen lg:grid-cols-[1fr_1.05fr]">
       <aside className="relative hidden flex-col justify-between overflow-hidden bg-brand-900 p-10 text-brand-50 lg:flex">
-        <Link href="/" className="text-white" aria-label="DocDue home">
-          <Logo />
+        <div aria-hidden="true" className="pat-grid pat-fade-radial absolute inset-0 opacity-[0.12]" />
+        <div aria-hidden="true" className="absolute -left-24 -top-24 size-80 rounded-full bg-brand-700/40 blur-3xl" />
+        <div aria-hidden="true" className="absolute -bottom-24 -right-16 size-80 rounded-full bg-amber-300/10 blur-3xl" />
+        <div aria-hidden="true" className="ring-spin absolute -bottom-32 -left-32 size-[26rem] rounded-full border border-dashed border-brand-700/60" />
+        <Link href="/" className="relative" aria-label="DocDue home">
+          <Logo tone="light" />
         </Link>
-        <div>
+        <div className="relative">
           <DocumentStack />
         </div>
-        <p className="max-w-sm font-display text-3xl font-bold leading-tight tracking-tight">
+        <p className="relative max-w-sm font-display text-3xl font-bold leading-tight tracking-tight">
           Every expiry date, before it matters.
         </p>
       </aside>
 
-      <main className="flex items-center justify-center px-5 py-10">
-        <div className="w-full max-w-md">
+      <main className="flex items-center justify-center px-4 py-8 sm:px-5 sm:py-10">
+        <Backdrop variant="auth" fixed />
+        <div className="w-full max-w-md rounded-2xl bg-white/85 p-5 shadow-[0_24px_50px_-28px_rgba(14,21,18,0.45)] ring-1 ring-brand-100 backdrop-blur-sm sm:p-8">
           <Link href="/" className="mb-8 inline-block lg:hidden" aria-label="DocDue home">
             <Logo />
           </Link>
