@@ -16,15 +16,15 @@ export function DocumentCard({ doc }: { doc: DocumentItem }) {
     return (
         <Link
             href={`/documents/${doc.id}`}
-            className="flex flex-col gap-2 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition hover:ring-indigo-400 focus-visible:outline-2 focus-visible:outline-indigo-600 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-2 rounded-xl bg-white p-4 shadow-sm ring-1 ring-ink-200 transition hover:ring-brand-400 focus-visible:outline-2 focus-visible:outline-brand-600 sm:flex-row sm:items-center sm:justify-between"
         >
             <div className="min-w-0">
                 <p className="truncate font-medium">{doc.title}</p>
-                <p className="mt-0.5 truncate text-sm text-slate-500">{meta}</p>
+                <p className="mt-0.5 truncate text-sm text-ink-500">{meta}</p>
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 sm:flex-col sm:items-end sm:gap-1">
                 <StatusBadge status={doc.status} />
-                <span className="text-sm text-slate-600">{expiryLine(doc.status, doc.expiry_date)}</span>
+                <span className="text-sm text-ink-600">{expiryLine(doc.status, doc.expiry_date)}</span>
             </div>
         </Link>
     );
