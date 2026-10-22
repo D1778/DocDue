@@ -5,7 +5,9 @@ import type { FormEvent } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { Stamp } from '@/components/brand/Stamp';
+import { TypeIcon } from '@/components/brand/TypeIcon';
 import type { StampTone } from '@/components/brand/Stamp';
+import { Dropdown } from '@/components/Dropdown';
 import { StatusBadge } from '@/components/StatusBadge';
 import {
   Alert,
@@ -13,7 +15,6 @@ import {
   Card,
   Field,
   FullPageSpinner,
-  Select,
   Spinner,
   TextInput,
 } from '@/components/ui';
@@ -177,22 +178,37 @@ export default function DocumentDetailPage() {
         ← Back to your documents
       </Link>
 
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="break-words font-display text-3xl font-bold tracking-tight">{d.title}</h1>
-          <p className="mt-1 text-sm text-ink-600">
-            {TYPE_LABEL[d.document_type]}
-            {d.original_filename ? ` · ${d.original_filename}` : ''}
-            {d.file_size ? ` · ${formatFileSize(d.file_size)}` : ''}
-          </p>
+      <div className="relative overflow-hidden rounded-2xl bg-white/90 p-4 shadow-sm ring-1 ring-ink-200 backdrop-blur-sm sm:p-6">
+        <span aria-hidden="true" className="pat-dots absolute inset-y-0 right-0 w-1/2 opacity-60 [mask-image:linear-gradient(to_left,#000,transparent)]" />
+        <div className="relative flex flex-wrap items-start justify-between gap-4">
+          <div className="flex min-w-0 items-start gap-4">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700 sm:size-14">
+              <TypeIcon type={d.document_type} className="size-7" />
+            </span>
+            <div className="min-w-0">
+              <h1 className="break-words font-display text-2xl font-bold tracking-tight sm:text-3xl">{d.title}</h1>
+              <p className="mt-1 text-sm text-ink-600">
+                {TYPE_LABEL[d.document_type]}
+                {d.original_filename ? ` · ${d.original_filename}` : ''}
+                {d.file_size ? ` · ${formatFileSize(d.file_size)}` : ''}
+              </p>
+              {d.expiry_date && (
+                <p className="mt-3 inline-flex flex-wrap items-center gap-x-2 rounded-lg bg-ink-50 px-3 py-1.5 text-sm ring-1 ring-ink-100">
+                  <span className="text-ink-500">Expires</span>
+                  <span className="font-stamp text-ink-900">{formatDate(d.expiry_date)}</span>
+                  <span className="text-ink-600">· {expiryText(d.expiry_date)}</span>
+                </p>
+              )}
+            </div>
+          </div>
+          {STAMP_TONE[d.status] ? (
+            <Stamp tone={STAMP_TONE[d.status] as StampTone} rotate={-4}>
+              {STATUS_LABEL[d.status]}
+            </Stamp>
+          ) : (
+            <StatusBadge status={d.status} />
+          )}
         </div>
-        {STAMP_TONE[d.status] ? (
-          <Stamp tone={STAMP_TONE[d.status] as StampTone} rotate={-4}>
-            {STATUS_LABEL[d.status]}
-          </Stamp>
-        ) : (
-          <StatusBadge status={d.status} />
-        )}
       </div>
 
       {doc.error && <Alert kind="error">{doc.error}</Alert>}
@@ -315,17 +331,12 @@ export default function DocumentDetailPage() {
               />
             </Field>
             <Field label="Document type" htmlFor="type">
-              <Select
+              <Dropdown
                 id="type"
                 value={typeValue}
-                onChange={(e) => setTypeDraft(e.target.value as DocumentType)}
-              >
-                {TYPE_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {TYPE_LABEL[option]}
-                  </option>
-                ))}
-              </Select>
+                onChange={setTypeDraft}
+                options={TYPE_OPTIONS.map((option) => ({ value: option, label: TYPE_LABEL[option] }))}
+              />
             </Field>
             <Button
               type="submit"

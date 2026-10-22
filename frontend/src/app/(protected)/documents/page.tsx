@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { EmptyTrayArt } from '@/components/brand/Art';
 import { DocumentCard } from '@/components/DocumentCard';
-import { Alert, ButtonLink, FullPageSpinner, PageHeader, Pagination, Select } from '@/components/ui';
+import { Alert, ButtonLink, FullPageSpinner, PageHeader, Pagination } from '@/components/ui';
+import { Dropdown } from '@/components/Dropdown';
 import { api } from '@/lib/api';
-import { STATUS_LABEL, TILE_NUMBER_STYLE, TILE_STATUSES, TYPE_LABEL, TYPE_OPTIONS } from '@/lib/labels';
+import { STATUS_BAR, STATUS_LABEL, TILE_NUMBER_STYLE, TILE_STATUSES, TYPE_LABEL, TYPE_OPTIONS } from '@/lib/labels';
 import type { DocumentStatus, DocumentType } from '@/lib/types';
 import { useResource } from '@/lib/useResource';
 
@@ -68,7 +69,7 @@ export default function DocumentsPage() {
 
       {/* Tiles: click one to show only those documents */}
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {TILE_STATUSES.map((tileStatus) => {
+        {TILE_STATUSES.map((tileStatus, index) => {
           const active = status === tileStatus;
           return (
             <button
@@ -76,12 +77,16 @@ export default function DocumentsPage() {
               type="button"
               aria-pressed={active}
               onClick={() => chooseStatus(active ? '' : tileStatus)}
-              className={`rounded-xl p-4 text-left shadow-sm transition focus-visible:outline-2 focus-visible:outline-brand-600 ${
+              className={`lift relative overflow-hidden rounded-2xl p-4 text-left shadow-sm focus-visible:outline-2 focus-visible:outline-brand-600 ${
+                index === 0 ? 'col-span-2 sm:col-span-1' : ''
+              } ${
                 active
                   ? 'bg-brand-50 ring-2 ring-brand-700'
                   : 'bg-white ring-1 ring-ink-200 hover:ring-brand-400'
               }`}
             >
+              <span aria-hidden="true" className="absolute -right-4 -top-4 size-16 rounded-full bg-brand-100/70" />
+              <span aria-hidden="true" className="absolute -right-1 top-6 size-8 rounded-full bg-brand-50" />
               <span className={`block font-display text-4xl font-bold leading-none ${TILE_NUMBER_STYLE[tileStatus]}`}>
                 {counts.data ? counts.data[tileStatus] : '-'}
               </span>
@@ -93,34 +98,30 @@ export default function DocumentsPage() {
 
       {/* Filters */}
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="w-44">
-          <Select
-            aria-label="Filter by type"
-            value={type}
-            onChange={(e) => chooseType(e.target.value as DocumentType | '')}
-          >
-            <option value="">All types</option>
-            {TYPE_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {TYPE_LABEL[option]}
-              </option>
-            ))}
-          </Select>
-        </div>
-        <div className="w-44">
-          <Select
-            aria-label="Filter by status"
-            value={status}
-            onChange={(e) => chooseStatus(e.target.value as DocumentStatus | '')}
-          >
-            <option value="">All statuses</option>
-            {TILE_STATUSES.map((option) => (
-              <option key={option} value={option}>
-                {STATUS_LABEL[option]}
-              </option>
-            ))}
-          </Select>
-        </div>
+        <Dropdown
+          className="w-full sm:w-52"
+          label="Filter by type"
+          value={type}
+          onChange={chooseType}
+          options={[
+            { value: '', label: 'All types' },
+            ...TYPE_OPTIONS.map((option) => ({ value: option, label: TYPE_LABEL[option] })),
+          ]}
+        />
+        <Dropdown
+          className="w-full sm:w-56"
+          label="Filter by status"
+          value={status}
+          onChange={chooseStatus}
+          options={[
+            { value: '', label: 'All statuses' },
+            ...TILE_STATUSES.map((option) => ({
+              value: option,
+              label: STATUS_LABEL[option],
+              dot: STATUS_BAR[option],
+            })),
+          ]}
+        />
         {filtered && (
           <button
             type="button"
@@ -166,7 +167,10 @@ export default function DocumentsPage() {
 
       {data && data.items.length > 0 && (
         <>
-          <ul aria-busy={list.loading} className={`space-y-3 ${list.loading ? 'opacity-60' : ''}`}>
+          <ul
+            aria-busy={list.loading}
+            className={`grid gap-4 sm:grid-cols-2 xl:grid-cols-3 ${list.loading ? 'opacity-60' : ''}`}
+          >
             {data.items.map((doc) => (
               <li key={doc.id}>
                 <DocumentCard doc={doc} />
