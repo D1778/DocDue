@@ -85,6 +85,27 @@ def build_digest(recipient_name: str, items: list[ReminderItem],
     return subject, text, html
 
 
+def build_password_reset(recipient_name: str, link: str, minutes: int) -> tuple[str, str, str]:
+    """The "forgot password" email. The subject is fixed text, never user-typed."""
+    name = recipient_name.strip() or "there"
+    subject = "Reset your DocDue password"
+    text = (f"Hello {name},\n\nSomeone asked to reset the password for your DocDue account. "
+            f"Open this link within {minutes} minutes to choose a new one:\n\n{link}\n\n"
+            "If this was not you, ignore this email. Your password stays the same.\n\nDocDue")
+    html = (
+        "<div style='font-family:Arial,sans-serif;max-width:560px'>"
+        f"<p>Hello {escape(name)},</p>"
+        "<p>Someone asked to reset the password for your DocDue account. "
+        f"The link works for {minutes} minutes.</p>"
+        f"<p><a href='{escape(link, quote=True)}' style='display:inline-block;background:#196b50;"
+        "color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:bold'>"
+        "Choose a new password</a></p>"
+        "<p style='color:#666;font-size:12px'>If this was not you, ignore this email. "
+        "Your password stays the same.</p></div>"
+    )
+    return subject, text, html
+
+
 def build_test_email(recipient_name: str) -> tuple[str, str, str]:
     name = recipient_name.strip() or "there"
     subject = "DocDue test email"

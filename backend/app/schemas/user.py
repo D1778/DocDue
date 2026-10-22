@@ -31,6 +31,7 @@ class UserResponse(BaseModel):
     created_at: datetime
     last_login_at: Optional[datetime] = None
     avatar: Optional[str] = None
+    has_password: bool = True
 
 
 class AvatarUpdate(BaseModel):

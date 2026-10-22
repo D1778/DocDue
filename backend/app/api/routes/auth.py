@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.api.deps import get_current_user
@@ -7,11 +7,15 @@ from app.core.utils import parse_object_id
 from app.models.tenant import Tenant
 from app.models.user import User
 from app.schemas.auth import (
+    ForgotPasswordRequest,
     GoogleLoginRequest,
     MeResponse,
+    MessageResponse,
+    PasswordChange,
     RefreshRequest,
     RegisterRequest,
     RegisterResponse,
+    ResetPasswordRequest,
     TokenResponse,
 )
 from app.schemas.user import AvatarUpdate, TenantResponse, UserResponse
@@ -98,3 +102,23 @@ async def remove_avatar(current_user: User = Depends(get_current_user)):
     current_user.avatar = None
     await current_user.save()
     return UserResponse.model_validate(current_user)
+
+
+@router.put("/me/password", response_model=UserResponse)
+async def change_password(body: PasswordChange, current_user: User = Depends(get_current_user)):
+    """Set a password (Google accounts) or change it (needs the current one). Only the caller's own."""
+    user = await auth_service.change_password(current_user, body.current_password, body.new_password)
+    return UserResponse.model_validate(user)
+
+
+@router.post("/forgot-password", response_model=MessageResponse)
+async def forgot_password(body: ForgotPasswordRequest, background: BackgroundTasks):
+    """Always answers the same way, so nobody can use this to find out which emails have accounts."""
+    background.add_task(auth_service.send_password_reset_email, body.email)
+    return MessageResponse(detail="If that email has a DocDue account, a reset link is on its way.")
+
+
+@router.post("/reset-password", response_model=MessageResponse)
+async def reset_password(body: ResetPasswordRequest):
+    await auth_service.reset_password(body.token, body.new_password)
+    return MessageResponse(detail="Your password has been changed. You can log in now.")

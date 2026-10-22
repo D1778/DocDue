@@ -210,6 +210,19 @@ export const api = {
     me: () => request<MeResponse>('/auth/me'),
     googleLogin: (credential: string) =>
         request<Tokens>('/auth/google', { method: 'POST', auth: false, body: { credential } }),
+    forgotPassword: (email: string) =>
+        request<{ detail: string }>('/auth/forgot-password', { method: 'POST', auth: false, body: { email } }),
+    resetPassword: (token: string, newPassword: string) =>
+        request<{ detail: string }>('/auth/reset-password', {
+            method: 'POST',
+            auth: false,
+            body: { token, new_password: newPassword },
+        }),
+    changePassword: (newPassword: string, currentPassword?: string) =>
+        request<User>('/auth/me/password', {
+            method: 'PUT',
+            body: { new_password: newPassword, current_password: currentPassword },
+        }),
     setAvatar: (avatar: string) => request<User>('/auth/me/avatar', { method: 'PUT', body: { avatar } }),
     removeAvatar: () => request<User>('/auth/me/avatar', { method: 'DELETE' }),
 
