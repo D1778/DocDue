@@ -1,3 +1,4 @@
+import uuid
 from types import SimpleNamespace
 
 import pytest
@@ -13,7 +14,9 @@ from app.services.email_service import EmailError
 from main import app
 from tests.fake_storage import FakeStorage
 
-TEST_DB_NAME = "docdue_test"
+# One database name per test run. Two runs at the same time (or a run that was stopped half way)
+# can then never see each other's users and fail with "email already exists".
+TEST_DB_NAME = f"docdue_test_{uuid.uuid4().hex[:8]}"
 
 
 @pytest_asyncio.fixture(autouse=True)
