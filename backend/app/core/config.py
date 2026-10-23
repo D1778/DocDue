@@ -41,13 +41,14 @@ class Settings(BaseSettings):
     EXPIRING_SOON_DAYS: int = 30                 # "expiring" means this many days or fewer left
 
     # --- Email (Sprint 4) ---
-    EMAIL_MODE: str = "console"                  # "console" = print in terminal, "smtp" = really send
+    EMAIL_MODE: str = "console"                  # "console", "smtp" or "brevo_api" (see email_service.py)
     EMAIL_FROM: str = "DocDue <no-reply@example.com>"
     SMTP_HOST: Optional[str] = None
     SMTP_PORT: int = 587
     SMTP_SECURITY: str = "starttls"              # "starttls" (port 587), "ssl" (port 465) or "none"
     SMTP_USERNAME: Optional[str] = None
     SMTP_PASSWORD: Optional[str] = None
+    BREVO_API_KEY: Optional[str] = None          # only for EMAIL_MODE=brevo_api (Sprint 6)
 
     # --- Daily job (Sprint 4) ---
     SCHEDULER_ENABLED: bool = True
@@ -56,6 +57,9 @@ class Settings(BaseSettings):
     REMINDER_DAYS: str = "30,14,7,1,0"           # days before expiry; 0 = the expiry day and after
     ORPHAN_AFTER_HOURS: int = 24                 # unfinished uploads older than this are removed
     STUCK_PROCESSING_MINUTES: int = 10           # "processing" for longer than this is retried
+
+    # --- Daily job trigger from outside (Sprint 6) ---
+    CRON_SECRET: Optional[str] = None            # empty = the outside trigger is switched off
 
     # --- App ---
     ENVIRONMENT: str = "development"

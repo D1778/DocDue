@@ -4,7 +4,7 @@ import { Bricolage_Grotesque, Public_Sans, Special_Elite } from 'next/font/googl
 import './globals.css';
 import { Providers } from './providers';
 import { SplashScreen } from '@/components/SplashScreen';
-
+import { WarmUp } from '@/components/WarmUp';
 // Three fonts, each with one job. Next.js downloads them at build time and serves them
 // from your own site, so visitors never contact Google.
 const display = Bricolage_Grotesque({
@@ -41,6 +41,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       >
         <SplashScreen />
         <Providers>{children}</Providers>
+        <WarmUp />
       </body>
     </html>
   );

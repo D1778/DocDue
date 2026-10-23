@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 from app.api.router import api_router
 from app.core import database
 from app.core.config import settings
+from app.core.production_checks import check_production_settings
 from app.services import email_service, ocr_service, scheduler
 from app.services.reminder_rules import parse_milestones
 from app.services.storage_service import StorageError
@@ -20,6 +21,7 @@ logger = logging.getLogger("docdue")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    check_production_settings()   # refuse to start with unsafe production settings
     await database.init_db()      # runs once at startup
     try:
         ocr_service.configure_tesseract(settings.TESSERACT_CMD)
@@ -35,17 +37,23 @@ async def lifespan(app: FastAPI):
     await database.close_db()     # runs once at shutdown
 
 
+IS_PRODUCTION = settings.ENVIRONMENT == "production"
+
 app = FastAPI(
     title="DocDue API",
     description="Document expiry tracking SaaS - backend API",
-    version="0.5.0",
+    version="1.0.0",
     lifespan=lifespan,
+    # The interactive API pages are for development only
+    docs_url=None if IS_PRODUCTION else "/docs",
+    redoc_url=None if IS_PRODUCTION else "/redoc",
+    openapi_url=None if IS_PRODUCTION else "/openapi.json",
 )
 
 # Allow the Next.js frontend to call this API from the browser
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL],
+    allow_origins=[settings.FRONTEND_URL.rstrip("/")],   # an origin never ends with "/"
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
