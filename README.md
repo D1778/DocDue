@@ -96,4 +96,4 @@ Six sprints on a GitHub Project board, one branch per feature, merged into `main
 
 
 ### OCR Pipeline
-![Tesseract Document Review Pipeline](docs/tesseract-pipeline.png)
+![Tesseract Document Review Pipeline](docs/ocr.png)
