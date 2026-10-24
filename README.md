@@ -2,8 +2,7 @@
 
 **Know before it expires.** DocDue keeps licences, certificates, insurance policies and permits in one place. It reads the expiry date from the scan with OCR and emails you before it runs out.
 
-Live site: https://YOUR-SITE.vercel.app
-Final-year MCA project, Dept. of Computer Science and Applications, CHRIST (Deemed to be University), Bangalore Central Campus.
+Live site: https://doc-due.vercel.app
 Author: Dinu Devees George
 
 ## What it does
