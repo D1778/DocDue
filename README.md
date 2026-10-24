@@ -2,8 +2,8 @@
 
 **Know before it expires.** DocDue keeps licences, certificates, insurance policies and permits in one place. It reads the expiry date from the scan with OCR and emails you before it runs out.
 
-Live site: https://YOUR-SITE.vercel.app
-Final-year MCA project, Dept. of Computer Science and Applications, CHRIST (Deemed to be University), Bangalore Central Campus.
+Live site: https://doc-due.vercel.app
+
 Author: Dinu Devees George
 
 ## What it does
@@ -70,13 +70,7 @@ cd frontend && npm run test && npm run build
 ```
 
 ## Environment variables
-
-Names only. Real values go in `backend/.env` and in the hosting dashboards, never in Git.
-
-| Where | Variables |
-|---|---|
-| Backend | `MONGODB_URI`, `MONGODB_DB_NAME`, `SECRET_KEY`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `S3_BUCKET_NAME`, `EMAIL_MODE`, `EMAIL_FROM`, `BREVO_API_KEY`, `CRON_SECRET`, `SCHEDULER_ENABLED`, `FRONTEND_URL`, `ENVIRONMENT` |
-| Frontend | `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_MAX_UPLOAD_MB` |
+All sensitive credentials, API keys, and connection strings are managed through environment variables to prevent secrets from being exposed in source control. For local development, copy the provided `.env.example` templates into `backend/.env` and `frontend/.env.local`, while production deployments configure these securely in the Render and Vercel dashboards.
 
 ## Security notes
 
