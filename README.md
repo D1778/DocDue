@@ -71,12 +71,6 @@ cd frontend && npm run test && npm run build
 
 ## Environment variables
 
-Names only. Real values go in `backend/.env` and in the hosting dashboards, never in Git.
-
-| Where | Variables |
-|---|---|
-| Backend | `MONGODB_URI`, `MONGODB_DB_NAME`, `SECRET_KEY`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `S3_BUCKET_NAME`, `EMAIL_MODE`, `EMAIL_FROM`, `BREVO_API_KEY`, `CRON_SECRET`, `SCHEDULER_ENABLED`, `FRONTEND_URL`, `ENVIRONMENT` |
-| Frontend | `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_MAX_UPLOAD_MB` |
 
 ## Security notes
 
