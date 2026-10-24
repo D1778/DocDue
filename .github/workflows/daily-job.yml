@@ -1,0 +1,43 @@
+name: Daily job
+
+on:
+  schedule:
+    - cron: "17 3 * * *"        # 03:17 UTC, which is 08:47 in India
+  workflow_dispatch:            # also lets you start it by hand from the Actions tab
+
+permissions: {}                 # this job does not need any access to the repository
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Wake the backend and run the daily job
+        env:
+          API_URL: ${{ secrets.API_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$API_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "::error::Add API_URL and CRON_SECRET under Settings, Secrets and variables, Actions"
+            exit 1
+          fi
+          API_URL="${API_URL%/}"
+
+          echo "Waiting for the backend to wake up..."
+          awake=0
+          for attempt in $(seq 1 16); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$API_URL/health" || true)
+            echo "attempt $attempt: HTTP $code"
+            if [ "$code" = "200" ]; then awake=1; break; fi
+            sleep 15
+          done
+          if [ "$awake" != "1" ]; then
+            echo "::error::The backend did not wake up in time"
+            exit 1
+          fi
+
+          echo "Running the daily job..."
+          curl --silent --show-error --fail-with-body --max-time 300 \
+            -X POST -H "X-Cron-Secret: $CRON_SECRET" \
+            "$API_URL/api/v1/maintenance/cron/daily-job"
+          echo
