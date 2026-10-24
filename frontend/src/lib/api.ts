@@ -42,7 +42,16 @@ function prettyField(name: string): string {
 
 /** Turn FastAPI's `detail` (a string, or a list of validation problems) into one readable sentence. */
 export function messageFromDetail(detail: unknown, status: number): string {
-    if (typeof detail === 'string' && detail.trim()) return detail;
+    if (typeof detail === 'string' && detail.trim()) {
+        const lower = detail.toLowerCase();
+        if (status >= 500 || lower.includes('internal server') || lower.includes('traceback') || lower.includes('exception')) {
+            return 'We encountered a temporary issue on our side. Please try again in a moment.';
+        }
+        if (detail === 'Not Found' && status === 404) {
+            return 'The requested item could not be found.';
+        }
+        return detail;
+    }
 
     if (Array.isArray(detail)) {
         const parts: string[] = [];

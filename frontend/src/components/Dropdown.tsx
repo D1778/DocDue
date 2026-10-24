@@ -97,7 +97,7 @@ export function Dropdown<T extends string>({
     }
 
     return (
-        <div ref={root} className={`relative ${className}`}>
+        <div ref={root} className={`relative ${open ? 'z-30' : ''} ${className}`}>
             <button
                 id={id}
                 type="button"
@@ -135,7 +135,7 @@ export function Dropdown<T extends string>({
                     id={listId}
                     role="listbox"
                     aria-label={label}
-                    className="dropdown-pop absolute left-0 right-0 z-40 mt-2 max-h-72 min-w-44 overflow-auto rounded-xl bg-white p-1.5 shadow-[0_18px_40px_-14px_rgba(14,21,18,0.4)] ring-1 ring-ink-200"
+                    className="dropdown-pop absolute left-0 right-0 z-50 mt-2 max-h-72 min-w-44 overflow-auto rounded-xl bg-white p-1.5 shadow-[0_18px_40px_-14px_rgba(14,21,18,0.4)] ring-1 ring-ink-200"
                 >
                     {options.map((option, index) => {
                         const isSelected = option.value === value;

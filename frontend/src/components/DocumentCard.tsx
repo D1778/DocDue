@@ -21,11 +21,11 @@ export function DocumentCard({ doc }: { doc: DocumentItem }) {
             <span aria-hidden="true" className="absolute right-0 top-0 size-7 bg-gradient-to-bl from-ink-200 via-ink-100 to-transparent [clip-path:polygon(100%_0,0_0,100%_100%)]" />
 
             <div className="flex items-start gap-3 pr-6">
-                <span className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${STATUS_TILE[doc.status]}`}>
-                    <TypeIcon type={doc.document_type} className="size-6" />
+                <span className={`flex size-10 shrink-0 items-center justify-center rounded-xl sm:size-11 ${STATUS_TILE[doc.status]}`}>
+                    <TypeIcon type={doc.document_type} className="size-5 sm:size-6" />
                 </span>
-                <div className="min-w-0">
-                    <p className="truncate font-display text-lg font-bold leading-tight group-hover:text-brand-800">{doc.title}</p>
+                <div className="min-w-0 flex-1">
+                    <p className="line-clamp-2 break-words font-display text-base font-bold leading-tight group-hover:text-brand-800 sm:text-lg">{doc.title}</p>
                     <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-ink-500">
                         {TYPE_LABEL[doc.document_type]}
                     </p>
@@ -33,10 +33,10 @@ export function DocumentCard({ doc }: { doc: DocumentItem }) {
             </div>
 
             <div className="mt-4 rounded-xl bg-ink-50 p-3 ring-1 ring-ink-100">
-                <div className="flex items-end justify-between gap-2">
-                    <div className="min-w-0">
+                <div className="flex flex-wrap items-end justify-between gap-2 sm:flex-nowrap">
+                    <div className="min-w-0 flex-1">
                         <p className="text-[11px] font-medium uppercase tracking-wider text-ink-500">Expiry date</p>
-                        <p className="mt-0.5 truncate font-stamp text-base text-ink-900">
+                        <p className="mt-0.5 truncate font-stamp text-sm text-ink-900 sm:text-base">
                             {hasDate
                                 ? formatDate(doc.expiry_date)
                                 : doc.status === 'processing'
@@ -47,10 +47,10 @@ export function DocumentCard({ doc }: { doc: DocumentItem }) {
                         </p>
                     </div>
                     {hasDate && (
-                        <span className="shrink-0 text-right font-display text-sm font-bold text-ink-800">
+                        <span className="shrink-0 text-right font-display text-xs font-bold text-ink-800 sm:text-sm">
                             {left !== null && left > 1 ? (
                                 <>
-                                    <span className="text-2xl leading-none">{left}</span> days
+                                    <span className="text-xl leading-none sm:text-2xl">{left}</span> days
                                 </>
                             ) : (
                                 expiryText(doc.expiry_date)

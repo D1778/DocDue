@@ -57,7 +57,7 @@ export function putToS3(
       } else {
         reject(
           new UploadError(
-            `The storage service refused the file (code ${xhr.status}). The upload link may have expired. Please try again.`,
+            'The upload could not be completed. The upload session may have timed out. Please try uploading the file again.',
           ),
         );
       }
@@ -65,7 +65,7 @@ export function putToS3(
     xhr.onerror = () =>
       reject(
         new UploadError(
-          'The upload failed. Check your internet connection. If it keeps failing, the S3 bucket CORS setting may be wrong.',
+          'The upload could not be completed. Please check your internet connection and try again.',
         ),
       );
     xhr.onabort = () => reject(new UploadError('The upload was cancelled.'));

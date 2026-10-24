@@ -43,7 +43,7 @@ async def verify_google_credential(credential: str) -> GoogleProfile:
     if not settings.GOOGLE_CLIENT_ID:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Google sign-in is not set up on this server",
+            detail="Google sign-in is currently unavailable. Please sign in with your email and password.",
         )
     try:
         async with httpx.AsyncClient(timeout=10) as client:

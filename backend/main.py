@@ -68,7 +68,7 @@ async def storage_error_handler(request: Request, exc: StorageError):
     logger.error("Storage error: %s (cause: %r)", exc, exc.__cause__)
     return JSONResponse(
         status_code=502,
-        content={"detail": "Storage service error. Please try again."},
+        content={"detail": "File storage is temporarily unavailable. Please try again in a moment."},
     )
 
 

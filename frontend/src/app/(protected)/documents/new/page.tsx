@@ -106,7 +106,7 @@ export default function UploadPage() {
       />
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="relative z-10 space-y-5">
         {action.error && (
           <Alert kind="error" title="The upload did not finish">
             {action.error}
@@ -122,7 +122,7 @@ export default function UploadPage() {
           }}
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}
-          className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 text-center transition has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-600 ${
+          className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-8 text-center transition has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-600 sm:px-6 sm:py-10 ${
             dragging ? 'border-brand-500 bg-brand-50' : 'border-ink-300 bg-white hover:border-brand-400'
           } ${uploading ? 'pointer-events-none opacity-60' : ''}`}
         >
@@ -136,15 +136,15 @@ export default function UploadPage() {
           />
           {file ? (
             <>
-              <span className="font-medium">{file.name}</span>
-              <span className="mt-1 text-sm text-ink-500">
+              <span className="max-w-full break-words font-medium text-sm sm:text-base">{file.name}</span>
+              <span className="mt-1 text-xs text-ink-500 sm:text-sm">
                 {formatFileSize(file.size)} · click to choose a different file
               </span>
             </>
           ) : (
             <>
-              <span className="font-medium">Drop a file here, or click to choose one</span>
-              <span className="mt-1 text-sm text-ink-500">PDF, JPEG or PNG</span>
+              <span className="font-medium text-sm sm:text-base">Drop a file here, or click to choose one</span>
+              <span className="mt-1 text-xs text-ink-500 sm:text-sm">PDF, JPEG or PNG</span>
             </>
           )}
         </label>
@@ -220,11 +220,11 @@ export default function UploadPage() {
           </Card>
         )}
 
-        <div className="flex gap-3">
-          <Button type="submit" loading={uploading} disabled={!file || !!fileProblem}>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Button type="submit" className="w-full sm:w-auto" loading={uploading} disabled={!file || !!fileProblem}>
             Upload
           </Button>
-          <Button variant="secondary" disabled={uploading} onClick={() => router.push('/documents')}>
+          <Button variant="secondary" className="w-full sm:w-auto" disabled={uploading} onClick={() => router.push('/documents')}>
             Cancel
           </Button>
         </div>

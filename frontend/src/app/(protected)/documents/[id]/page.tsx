@@ -7,6 +7,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Stamp } from '@/components/brand/Stamp';
 import { TypeIcon } from '@/components/brand/TypeIcon';
 import type { StampTone } from '@/components/brand/Stamp';
+import { DatePicker } from '@/components/DatePicker';
 import { Dropdown } from '@/components/Dropdown';
 import { StatusBadge } from '@/components/StatusBadge';
 import {
@@ -180,20 +181,20 @@ export default function DocumentDetailPage() {
 
       <div className="relative overflow-hidden rounded-2xl bg-white/90 p-4 shadow-sm ring-1 ring-ink-200 backdrop-blur-sm sm:p-6">
         <span aria-hidden="true" className="pat-dots absolute inset-y-0 right-0 w-1/2 opacity-60 [mask-image:linear-gradient(to_left,#000,transparent)]" />
-        <div className="relative flex flex-wrap items-start justify-between gap-4">
-          <div className="flex min-w-0 items-start gap-4">
-            <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700 sm:size-14">
-              <TypeIcon type={d.document_type} className="size-7" />
+        <div className="relative flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-start">
+          <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700 sm:size-14">
+              <TypeIcon type={d.document_type} className="size-6 sm:size-7" />
             </span>
-            <div className="min-w-0">
-              <h1 className="break-words font-display text-2xl font-bold tracking-tight sm:text-3xl">{d.title}</h1>
-              <p className="mt-1 text-sm text-ink-600">
+            <div className="min-w-0 flex-1">
+              <h1 className="break-words font-display text-xl font-bold tracking-tight sm:text-3xl">{d.title}</h1>
+              <p className="mt-1 break-words text-xs text-ink-600 sm:text-sm">
                 {TYPE_LABEL[d.document_type]}
                 {d.original_filename ? ` · ${d.original_filename}` : ''}
                 {d.file_size ? ` · ${formatFileSize(d.file_size)}` : ''}
               </p>
               {d.expiry_date && (
-                <p className="mt-3 inline-flex flex-wrap items-center gap-x-2 rounded-lg bg-ink-50 px-3 py-1.5 text-sm ring-1 ring-ink-100">
+                <p className="mt-3 inline-flex flex-wrap items-center gap-x-2 rounded-lg bg-ink-50 px-2.5 py-1.5 text-xs ring-1 ring-ink-100 sm:px-3 sm:text-sm">
                   <span className="text-ink-500">Expires</span>
                   <span className="font-stamp text-ink-900">{formatDate(d.expiry_date)}</span>
                   <span className="text-ink-600">· {expiryText(d.expiry_date)}</span>
@@ -201,13 +202,15 @@ export default function DocumentDetailPage() {
               )}
             </div>
           </div>
-          {STAMP_TONE[d.status] ? (
-            <Stamp tone={STAMP_TONE[d.status] as StampTone} rotate={-4}>
-              {STATUS_LABEL[d.status]}
-            </Stamp>
-          ) : (
-            <StatusBadge status={d.status} />
-          )}
+          <div className="shrink-0 self-start sm:self-auto">
+            {STAMP_TONE[d.status] ? (
+              <Stamp tone={STAMP_TONE[d.status] as StampTone} rotate={-3} className="text-sm sm:text-base">
+                {STATUS_LABEL[d.status]}
+              </Stamp>
+            ) : (
+              <StatusBadge status={d.status} />
+            )}
+          </div>
         </div>
       </div>
 
@@ -266,20 +269,20 @@ export default function DocumentDetailPage() {
               htmlFor="expiry"
               hint="A date you enter always replaces the one found automatically."
             >
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="w-48">
-                  <TextInput
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="w-full sm:w-56">
+                  <DatePicker
                     id="expiry"
-                    type="date"
                     min={limits.min}
                     max={limits.max}
                     disabled={processing}
                     value={dateValue}
-                    onChange={(e) => setDateDraft(e.target.value)}
+                    onChange={(newDate) => setDateDraft(newDate)}
                   />
                 </div>
                 <Button
                   type="submit"
+                  className="w-full sm:w-auto"
                   loading={dateAction.busy}
                   disabled={processing || !dateValue || dateValue === savedDate}
                 >
@@ -303,11 +306,11 @@ export default function DocumentDetailPage() {
             <Alert kind="error">{fileAction.error}</Alert>
           </div>
         )}
-        <div className="mt-3 flex flex-wrap gap-3">
-          <Button variant="secondary" disabled={fileAction.busy || processing} onClick={() => void openFile(false)}>
+        <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+          <Button variant="secondary" className="w-full sm:w-auto" disabled={fileAction.busy || processing} onClick={() => void openFile(false)}>
             View file
           </Button>
-          <Button variant="secondary" disabled={fileAction.busy || processing} onClick={() => void openFile(true)}>
+          <Button variant="secondary" className="w-full sm:w-auto" disabled={fileAction.busy || processing} onClick={() => void openFile(true)}>
             Download
           </Button>
         </div>
@@ -317,7 +320,7 @@ export default function DocumentDetailPage() {
       </Card>
 
       {/* Details */}
-      <Card>
+      <Card className="relative z-10">
         <h2 className="font-display text-lg font-bold">Details</h2>
         {canEdit ? (
           <form onSubmit={handleDetailsSubmit} className="mt-3 space-y-4">
@@ -340,6 +343,7 @@ export default function DocumentDetailPage() {
             </Field>
             <Button
               type="submit"
+              className="w-full sm:w-auto"
               loading={detailsAction.busy}
               disabled={
                 !titleValue.trim() || (titleValue.trim() === d.title && typeValue === d.document_type)
@@ -372,11 +376,11 @@ export default function DocumentDetailPage() {
           )}
 
           {confirm === null && (
-            <div className="mt-3 flex flex-wrap gap-3">
-              <Button variant="secondary" disabled={processing} onClick={() => setConfirm('reprocess')}>
+            <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+              <Button variant="secondary" className="w-full sm:w-auto" disabled={processing} onClick={() => setConfirm('reprocess')}>
                 Read the document again
               </Button>
-              <Button variant="danger" onClick={() => setConfirm('delete')}>
+              <Button variant="danger" className="w-full sm:w-auto" onClick={() => setConfirm('delete')}>
                 Delete document
               </Button>
             </div>
@@ -387,11 +391,11 @@ export default function DocumentDetailPage() {
               <p className="text-sm">
                 DocDue will read the file again and the current expiry date will be cleared. Continue?
               </p>
-              <div className="flex gap-3">
-                <Button loading={dangerAction.busy} onClick={() => void reprocess()}>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button className="w-full sm:w-auto" loading={dangerAction.busy} onClick={() => void reprocess()}>
                   Yes, read again
                 </Button>
-                <Button variant="secondary" onClick={() => setConfirm(null)}>
+                <Button variant="secondary" className="w-full sm:w-auto" onClick={() => setConfirm(null)}>
                   Cancel
                 </Button>
               </div>
@@ -403,11 +407,11 @@ export default function DocumentDetailPage() {
               <p className="text-sm">
                 Delete <strong>{d.title}</strong>? The file is removed from storage and this cannot be undone.
               </p>
-              <div className="flex gap-3">
-                <Button variant="danger" loading={dangerAction.busy} onClick={() => void remove()}>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button variant="danger" className="w-full sm:w-auto" loading={dangerAction.busy} onClick={() => void remove()}>
                   Yes, delete it
                 </Button>
-                <Button variant="secondary" onClick={() => setConfirm(null)}>
+                <Button variant="secondary" className="w-full sm:w-auto" onClick={() => setConfirm(null)}>
                   Cancel
                 </Button>
               </div>

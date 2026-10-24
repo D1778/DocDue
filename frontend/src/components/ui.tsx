@@ -131,7 +131,7 @@ export function Card({
   className?: string;
 }) {
   return (
-    <section className={`rounded-2xl bg-white/90 p-4 shadow-sm ring-1 ring-ink-200 backdrop-blur-sm sm:p-5 ${className}`}>
+    <section className={`rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink-200 sm:p-5 ${className}`}>
       {children}
     </section>
   );
@@ -147,12 +147,12 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
+    <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="min-w-0 flex-1">
+        <h1 className="break-words font-display text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
         {subtitle && <p className="mt-1 text-sm text-ink-600">{subtitle}</p>}
       </div>
-      {action}
+      {action && <div className="w-full shrink-0 sm:w-auto">{action}</div>}
     </div>
   );
 }
@@ -209,15 +209,15 @@ export function Pagination({
   const first = page * pageSize + 1;
   const last = Math.min(total, (page + 1) * pageSize);
   return (
-    <nav aria-label="Pages" className="mt-4 flex items-center justify-between text-sm text-ink-600">
-      <span>
+    <nav aria-label="Pages" className="mt-6 flex flex-col items-center justify-between gap-3 text-sm text-ink-600 sm:flex-row">
+      <span className="text-center sm:text-left">
         Showing {first} to {last} of {total}
       </span>
-      <div className="flex gap-2">
-        <Button variant="secondary" disabled={page === 0} onClick={() => onChange(page - 1)}>
+      <div className="flex w-full justify-between gap-2 sm:w-auto">
+        <Button variant="secondary" className="flex-1 sm:flex-initial" disabled={page === 0} onClick={() => onChange(page - 1)}>
           Previous
         </Button>
-        <Button variant="secondary" disabled={last >= total} onClick={() => onChange(page + 1)}>
+        <Button variant="secondary" className="flex-1 sm:flex-initial" disabled={last >= total} onClick={() => onChange(page + 1)}>
           Next
         </Button>
       </div>
