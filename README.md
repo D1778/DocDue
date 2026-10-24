@@ -93,3 +93,7 @@ Free hosting sleeps after 15 minutes without visitors (first request about a min
 ## Project process
 
 Six sprints on a GitHub Project board, one branch per feature, merged into `main` and tagged: auth and database, S3 upload, OCR, scheduler and alerts, frontend, deployment.
+
+
+### OCR Pipeline
+![Tesseract Document Review Pipeline](docs/tesseract-pipeline.png)
