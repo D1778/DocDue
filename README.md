@@ -70,7 +70,7 @@ cd frontend && npm run test && npm run build
 ```
 
 ## Environment variables
-
+All sensitive credentials, API keys, and connection strings are managed through environment variables to prevent secrets from being exposed in source control. For local development, copy the provided `.env.example` templates into `backend/.env` and `frontend/.env.local`, while production deployments configure these securely in the Render and Vercel dashboards.
 
 ## Security notes
 
