@@ -16,7 +16,7 @@ export function AuthShell({
   children: ReactNode;
 }) {
   return (
-    <div className="grid min-h-screen lg:grid-cols-[1fr_1.05fr]">
+    <div className="grid min-h-[100svh] lg:grid-cols-[1fr_1.05fr]">
       <aside className="relative hidden flex-col justify-between overflow-hidden bg-brand-900 p-10 text-brand-50 lg:flex">
         <div aria-hidden="true" className="pat-grid pat-fade-radial absolute inset-0 opacity-[0.12]" />
         <div aria-hidden="true" className="absolute -left-24 -top-24 size-80 rounded-full bg-brand-700/40 blur-3xl" />

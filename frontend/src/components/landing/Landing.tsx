@@ -69,7 +69,7 @@ function Hero() {
   return (
     <section className="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-16 pt-6 lg:grid-cols-[1.05fr_1fr] lg:gap-6 lg:pb-24 lg:pt-12">
       <div>
-        <h1 className="font-display text-[3.1rem] font-extrabold leading-[0.95] tracking-tight text-balance text-ink-950 sm:text-7xl">
+        <h1 className="font-display text-[clamp(2.4rem,8vw,4.5rem)] font-extrabold leading-[0.95] tracking-tight text-balance text-ink-950 sm:text-7xl">
           Know before it expires.
         </h1>
         <p className="mt-6 max-w-[34rem] text-lg leading-relaxed text-ink-700">
@@ -148,7 +148,7 @@ function DashboardPreview() {
   ];
   return (
     <div aria-label="Example dashboard" role="img">
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {tiles.map((t) => (
           <div key={t.label} className="rounded-lg bg-ink-50 p-3 ring-1 ring-ink-200">
             <span className={`block font-display text-3xl font-bold leading-none ${t.num}`}>{t.n}</span>

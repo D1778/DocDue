@@ -260,7 +260,7 @@ export function DatePicker({
           id={popoverId}
           role="dialog"
           aria-label="Choose expiry date"
-          className="dropdown-pop absolute left-0 z-50 mt-2 w-80 rounded-2xl bg-white p-3.5 shadow-[0_20px_45px_-12px_rgba(14,21,18,0.35)] ring-1 ring-ink-200 sm:w-[21.5rem]"
+          className="dropdown-pop absolute left-0 z-50 mt-2 w-[min(21.5rem,calc(100vw-2rem))] rounded-2xl bg-white p-3.5 shadow-[0_20px_45px_-12px_rgba(14,21,18,0.35)] ring-1 ring-ink-200"
         >
           {/* Header: Month and Year Navigators */}
           <div className="flex items-center justify-between pb-3 border-b border-ink-100">

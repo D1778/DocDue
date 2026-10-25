@@ -181,7 +181,7 @@ export default function DocumentDetailPage() {
 
       <div className="relative overflow-hidden rounded-2xl bg-white/90 p-4 shadow-sm ring-1 ring-ink-200 backdrop-blur-sm sm:p-6">
         <span aria-hidden="true" className="pat-dots absolute inset-y-0 right-0 w-1/2 opacity-60 [mask-image:linear-gradient(to_left,#000,transparent)]" />
-        <div className="relative flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-start">
+        <div className="relative flex flex-wrap items-start justify-between gap-4 sm:flex-nowrap sm:items-start">
           <div className="flex min-w-0 items-start gap-3 sm:gap-4">
             <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700 sm:size-14">
               <TypeIcon type={d.document_type} className="size-6 sm:size-7" />

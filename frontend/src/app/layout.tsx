@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import { Bricolage_Grotesque, Public_Sans, Special_Elite } from 'next/font/google';
 import './globals.css';
@@ -31,6 +31,12 @@ export const metadata: Metadata = {
   },
   description:
     'Keep every licence, certificate and permit in one place. DocDue reads the expiry date from your scan and emails you before it runs out.',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

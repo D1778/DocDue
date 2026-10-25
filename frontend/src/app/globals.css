@@ -40,6 +40,18 @@
 
 html {
   color-scheme: light;
+  /* Prevent any element from causing horizontal scroll */
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* Images and media should never exceed their container */
+img, svg, video, iframe {
+  max-width: 100%;
+  height: auto;
 }
 
 ::selection {

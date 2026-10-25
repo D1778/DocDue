@@ -68,18 +68,20 @@ export default function DocumentsPage() {
       />
 
       {/* Tiles: click one to show only those documents */}
+      {/* On mobile (2-col): tiles lay out as [full-width] + [2] + [2] = 5 tiles cleanly */}
       <div className="mb-6 grid grid-cols-2 gap-2.5 sm:gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {TILE_STATUSES.map((tileStatus, index) => {
           const active = status === tileStatus;
+          // First tile spans both columns on mobile so the remaining 4 pair up evenly (2+2).
+          // On sm (3-col) and lg (5-col) every tile is 1 column.
+          const colSpan = index === 0 ? 'col-span-2 sm:col-span-1' : '';
           return (
             <button
               key={tileStatus}
               type="button"
               aria-pressed={active}
               onClick={() => chooseStatus(active ? '' : tileStatus)}
-              className={`lift relative flex min-h-[92px] flex-col justify-between overflow-hidden rounded-2xl p-3 sm:min-h-[104px] sm:p-4 text-left shadow-sm focus-visible:outline-2 focus-visible:outline-brand-600 ${
-                index === 0 ? 'col-span-2 sm:col-span-1' : ''
-              } ${
+              className={`lift relative flex min-h-[92px] flex-col justify-between overflow-hidden rounded-2xl p-3 sm:min-h-[104px] sm:p-4 text-left shadow-sm focus-visible:outline-2 focus-visible:outline-brand-600 ${colSpan} ${
                 active
                   ? 'bg-brand-50 ring-2 ring-brand-700'
                   : 'bg-white ring-1 ring-ink-200 hover:ring-brand-400'
