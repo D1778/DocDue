@@ -173,8 +173,8 @@ export default function DocumentsPage() {
             aria-busy={list.loading}
             className={`grid gap-4 sm:grid-cols-2 xl:grid-cols-3 ${list.loading ? 'opacity-60' : ''}`}
           >
-            {data.items.map((doc) => (
-              <li key={doc.id}>
+          {data.items.map((doc) => (
+              <li key={doc.id} className="min-w-0">
                 <DocumentCard doc={doc} />
               </li>
             ))}

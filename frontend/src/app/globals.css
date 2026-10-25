@@ -40,16 +40,18 @@
 
 html {
   color-scheme: light;
-  /* Prevent any element from causing horizontal scroll */
-  overflow-x: hidden;
 }
 
 body {
-  overflow-x: hidden;
+  /* clip prevents horizontal content overflow without creating a new scroll container,
+     so position:sticky on the NavBar continues to work correctly */
+  overflow-x: clip;
 }
 
-/* Images and media should never exceed their container */
-img, svg, video, iframe {
+/* Only images/video/iframes need max-width:100% + height:auto.
+   Inline SVG icons already have explicit sizes via Tailwind size-* utilities;
+   applying height:auto would override those heights. */
+img, video, iframe {
   max-width: 100%;
   height: auto;
 }

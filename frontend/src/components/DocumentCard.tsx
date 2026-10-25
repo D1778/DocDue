@@ -15,7 +15,7 @@ export function DocumentCard({ doc }: { doc: DocumentItem }) {
     return (
         <Link
             href={`/documents/${doc.id}`}
-            className={`lift group relative flex h-full flex-col overflow-hidden rounded-2xl border-l-4 bg-white p-4 shadow-sm ring-1 ring-ink-200 hover:ring-brand-400 focus-visible:outline-2 focus-visible:outline-brand-600 sm:p-5 ${STATUS_STRIPE[doc.status]}`}
+        className={`lift group relative flex h-full w-full min-w-0 flex-col overflow-hidden rounded-2xl border-l-4 bg-white p-4 shadow-sm ring-1 ring-ink-200 hover:ring-brand-400 focus-visible:outline-2 focus-visible:outline-brand-600 sm:p-5 ${STATUS_STRIPE[doc.status]}`}
         >
             {/* paper corner fold */}
             <span aria-hidden="true" className="absolute right-0 top-0 size-7 bg-gradient-to-bl from-ink-200 via-ink-100 to-transparent [clip-path:polygon(100%_0,0_0,100%_100%)]" />
